@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const csrf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
-const { Admin } = require("./models");
+const { Admin, Election } = require("./models");
 const bodyParser = require("body-parser");
 const path = require("path");
 const bcrypt = require("bcrypt");
@@ -88,10 +88,49 @@ app.get("/", (request, response) => {
 app.get(
   "/elections",
   connectEnsureLogin.ensureLoggedIn(),
-  (request, response) => {
-    response.render("elections", {
-      title: "Online Voting Platform",
+  async (request, response) => {
+    try {
+      const elections = await Election.getElections(request.user.id);
+      response.render("elections", {
+        title: "Online Voting Platform",
+        elections,
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+app.get(
+  "/elections/create",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    response.render("new_election", {
+      title: "Create an election",
+      csrfToken: request.csrfToken(),
     });
+  }
+);
+
+app.post(
+  "/elections",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    if (request.body.electionName.length < 5) {
+      request.flash("error", "Election name length should be atleast 5");
+      return response.redirect("/elections/create");
+    }
+    try {
+      await Election.addElection({
+        electionName: request.body.electionName,
+        adminID: request.user.id,
+      });
+      response.redirect("/elections");
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
   }
 );
 

@@ -8,12 +8,22 @@
     <title><%= title %></title>
 </head>
 <body>
-    <div>
-        <% if (messages.success) { %>
-            <p class="bg-purple-100 m-3 list-none rounded-md px-4 py-2"><%= messages.success %></p>
-        <% } %>
+    <%- include('header.ejs') %>
+    <div class="my-3 mx-6">
+        <div>
+            <% if (messages.success) { %>
+                <p class="bg-purple-100 m-3 list-none rounded-md px-4 py-2"><%= messages.success %></p>
+            <% } %>
+        </div>
+        <div class="flex gap-2 py-4 justify-between">
+            <h5 class="text-xl">My Elections</h5>
+            <div class="bg-purple-800 rounded w-fit px-2 py-1 hover:bg-purple-600">
+                <a href="/elections/create" class="text-white">+ Create a new election</a>
+            </div>
+        </div>
+        <div class="flex-auto">
+            <%- include('elections_list.ejs') %>
+        </div>
     </div>
-    <a class="text-sm text-purple-600 hover:text-purple-400 p-3" href="/password-reset" >Forgot password?</a>
-    <a class="text-sm text-purple-600 hover:text-purple-400 p-3" href="/signout">Sign out</a>
 </body>
 </html>

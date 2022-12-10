@@ -10,6 +10,16 @@ function extractCsrfToken(res) {
   return $("[name=_csrf]").val();
 }
 
+const login = async (agent, username, password) => {
+  let res = await agent.get("/login");
+  let csrfToken = extractCsrfToken(res);
+  res = await agent.post("/session").send({
+    email: username,
+    password: password,
+    _csrf: csrfToken,
+  });
+};
+
 describe("Online voting application", function () {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
@@ -46,5 +56,18 @@ describe("Online voting application", function () {
     expect(res.statusCode).toBe(302);
     res = await agent.get("/elections");
     expect(res.statusCode).toBe(302);
+  });
+
+  test("Creating a election", async () => {
+    const agent = request.agent(server);
+    await login(agent, "user.a@test.com", "12345678");
+    const res = await agent.get("/elections/create");
+    const csrfToken = extractCsrfToken(res);
+    const response = await agent.post("/elections").send({
+      electionName: "Test election",
+      _csrf: csrfToken,
+    });
+    console.log(response);
+    expect(response.statusCode).toBe(302);
   });
 });

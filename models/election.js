@@ -1,38 +1,46 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, where } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Admin extends Model {
+  class Election extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
 
-    resetPass(password) {
-      return this.update({ password });
+    static addElection({ electionName, adminID }) {
+      return this.create({
+        electionName,
+        adminID,
+      });
+    }
+
+    static getElections(adminID) {
+      return this.findAll({
+        where: {
+          adminID,
+        },
+      });
     }
 
     static associate(models) {
       // define association here
-      Admin.hasMany(models.Election, {
+      Election.belongsTo(models.Admin, {
         foreignKey: "adminID",
       });
     }
   }
-  Admin.init(
+  Election.init(
     {
-      firstName: DataTypes.STRING,
-      lastName: DataTypes.STRING,
-      email: {
+      electionName: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      password: DataTypes.STRING,
     },
     {
       sequelize,
-      modelName: "Admin",
+      modelName: "Election",
     }
   );
-  return Admin;
+  return Election;
 };
