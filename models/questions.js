@@ -23,6 +23,22 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static getQuestion(id) {
+      return this.findOne({
+        where: {
+          id,
+        },
+      });
+    }
+
+    static deleteQuestion(id) {
+      return this.destroy({
+        where: {
+          id,
+        },
+      });
+    }
+
     static getQuestions(electionID) {
       return this.findAll({
         where: {
@@ -35,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Questions.belongsTo(models.Election, {
         foreignKey: "electionID",
+      });
+
+      Questions.hasMany(models.Options, {
+        foreignKey: "questionID",
       });
     }
   }

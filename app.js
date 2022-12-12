@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const csrf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
-const { Admin, Election, Questions } = require("./models");
+const { Admin, Election, Questions, Options } = require("./models");
 const bodyParser = require("body-parser");
 const path = require("path");
 const bcrypt = require("bcrypt");
@@ -82,6 +82,7 @@ app.get("/", (request, response) => {
   } else {
     response.render("index", {
       title: "Online Voting Platform",
+      csrfToken: request.csrfToken(),
     });
   }
 });
@@ -311,6 +312,7 @@ app.get(
       title: election.electionName,
       id: request.params.id,
       questions: questions,
+      csrfToken: request.csrfToken(),
     });
   }
 );
@@ -347,6 +349,78 @@ app.post(
       return response.redirect(
         `/elections/${request.params.id}/questions/${question.id}`
       );
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//delete question
+app.delete(
+  "/questions/:questionID",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const res = await Questions.deleteQuestion(request.params.questionID);
+      return response.json({ success: res === 1 });
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//question page
+app.get(
+  "/elections/:id/questions/:questionID",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const question = await Questions.getQuestion(request.params.questionID);
+    const options = await Options.getOptions(request.params.questionID);
+    response.render("question_page", {
+      title: question.question,
+      description: question.description,
+      id: request.params.id,
+      questionID: request.params.questionID,
+      options,
+      csrfToken: request.csrfToken(),
+    });
+  }
+);
+
+//adding options
+app.post(
+  "/elections/:id/questions/:questionID",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    if (!request.body.option.length) {
+      request.flash("error", "Please enter option");
+      return response.redirect("/todos");
+    }
+    try {
+      await Options.addOption({
+        option: request.body.option,
+        questionID: request.params.questionID,
+      });
+      return response.redirect(
+        `/elections/${request.params.id}/questions/${request.params.questionID}`
+      );
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//delete options
+app.delete(
+  "/options/:optionID",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const res = await Options.deleteOption(request.params.optionID);
+      return response.json({ success: res === 1 });
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
