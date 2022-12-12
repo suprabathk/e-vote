@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+</head>
+<body>
+    <%- include('header.ejs') %>
+    <div class="my-6 mx-10">
+        <h3 class="text-4xl my-4 font-medium"><%= title %></h3>
+        <div class="my-8">
+            <h2 class="my-2 text-lg text-black flex gap-1">Your election has <span class="text-purple-600"> <%= nq %> </span> questions in the ballot</h2>
+            <a href="/elections/<%= id %>/questions" class="py-1 hover:text-purple-800 text-purple-600">Manage questions</a>
+        </div>
+        <div class="my-8">
+            <h2 class="my-2 text-lg text-black flex gap-1">Your election has <span class="text-purple-600"> <%= nv %> </span> registered voters.</h2>
+            <a href="" class="py-1 hover:text-purple-800 text-purple-600">Manage voters</a>
+        </div>
+        <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600">
+            <a href="" class="text-white">Launch election</a>
+        </div>
+    </div>
+</body>
+</html>

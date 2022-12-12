@@ -23,10 +23,23 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static getElection(id, adminID) {
+      return this.findOne({
+        where: {
+          adminID,
+          id,
+        },
+      });
+    }
+
     static associate(models) {
       // define association here
       Election.belongsTo(models.Admin, {
         foreignKey: "adminID",
+      });
+
+      Election.hasMany(models.Questions, {
+        foreignKey: "electionID",
       });
     }
   }
@@ -35,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
       electionName: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      running: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
       },
     },
     {
