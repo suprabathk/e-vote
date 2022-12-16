@@ -13,6 +13,15 @@ module.exports = (sequelize, DataTypes) => {
         where: {
           questionID,
         },
+        order: [["id", "ASC"]],
+      });
+    }
+
+    static getOption(id) {
+      return this.findOne({
+        where: {
+          id,
+        },
       });
     }
 
@@ -21,6 +30,19 @@ module.exports = (sequelize, DataTypes) => {
         option,
         questionID,
       });
+    }
+
+    static updateOption({ option, id }) {
+      return this.update(
+        {
+          option,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
     }
 
     static deleteOption(id) {

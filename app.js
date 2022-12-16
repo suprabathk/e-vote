@@ -95,11 +95,17 @@ app.get(
     let loggedinuser = request.user.firstName + " " + request.user.lastName;
     try {
       const elections = await Election.getElections(request.user.id);
-      response.render("elections", {
-        title: "Online Voting Platform",
-        userName: loggedinuser,
-        elections,
-      });
+      if (request.accepts("html")) {
+        response.render("elections", {
+          title: "Online Voting Platform",
+          userName: loggedinuser,
+          elections,
+        });
+      } else {
+        return response.json({
+          elections,
+        });
+      }
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
@@ -243,7 +249,7 @@ app.get(
   "/elections/create",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    response.render("new_election", {
+    return response.render("new_election", {
       title: "Create an election",
       csrfToken: request.csrfToken(),
     });
@@ -264,7 +270,7 @@ app.post(
         electionName: request.body.electionName,
         adminID: request.user.id,
       });
-      response.redirect("/elections");
+      return response.redirect("/elections");
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
@@ -285,7 +291,7 @@ app.get(
       const numberOfQuestions = await Questions.getNumberOfQuestions(
         request.params.id
       );
-      response.render("election_page", {
+      return response.render("election_page", {
         id: request.params.id,
         title: election.electionName,
         nq: numberOfQuestions,
@@ -308,12 +314,18 @@ app.get(
       request.user.id
     );
     const questions = await Questions.getQuestions(request.params.id);
-    response.render("questions", {
-      title: election.electionName,
-      id: request.params.id,
-      questions: questions,
-      csrfToken: request.csrfToken(),
-    });
+    if (request.accepts("html")) {
+      return response.render("questions", {
+        title: election.electionName,
+        id: request.params.id,
+        questions: questions,
+        csrfToken: request.csrfToken(),
+      });
+    } else {
+      return response.json({
+        questions,
+      });
+    }
   }
 );
 
@@ -322,7 +334,7 @@ app.get(
   "/elections/:id/questions/create",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    response.render("new_question", {
+    return response.render("new_question", {
       id: request.params.id,
       csrfToken: request.csrfToken(),
     });
@@ -356,14 +368,61 @@ app.post(
   }
 );
 
-//delete question
-app.delete(
-  "/questions/:questionID",
+//edit question page
+app.get(
+  "/elections/:electionID/questions/:questionID/edit",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     try {
-      const res = await Questions.deleteQuestion(request.params.questionID);
-      return response.json({ success: res === 1 });
+      const question = await Questions.getQuestion(request.params.questionID);
+      return response.render("edit_question", {
+        electionID: request.params.electionID,
+        questionID: request.params.questionID,
+        questionTitle: question.question,
+        questionDescription: question.description,
+        csrfToken: request.csrfToken(),
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//edit question
+app.put(
+  "/questions/:questionID/edit",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const updatedQuestion = await Questions.updateQuestion({
+        question: request.body.question,
+        description: request.body.description,
+        id: request.params.questionID,
+      });
+      return response.json(updatedQuestion);
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//delete question
+app.delete(
+  "/elections/:electionID/questions/:questionID",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const nq = await Questions.getNumberOfQuestions(
+        request.params.electionID
+      );
+      if (nq > 1) {
+        const res = await Questions.deleteQuestion(request.params.questionID);
+        return response.json({ success: res === 1 });
+      } else {
+        return response.json({ success: false });
+      }
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
@@ -378,14 +437,20 @@ app.get(
   async (request, response) => {
     const question = await Questions.getQuestion(request.params.questionID);
     const options = await Options.getOptions(request.params.questionID);
-    response.render("question_page", {
-      title: question.question,
-      description: question.description,
-      id: request.params.id,
-      questionID: request.params.questionID,
-      options,
-      csrfToken: request.csrfToken(),
-    });
+    if (request.accepts("html")) {
+      response.render("question_page", {
+        title: question.question,
+        description: question.description,
+        id: request.params.id,
+        questionID: request.params.questionID,
+        options,
+        csrfToken: request.csrfToken(),
+      });
+    } else {
+      return response.json({
+        options,
+      });
+    }
   }
 );
 
@@ -396,7 +461,7 @@ app.post(
   async (request, response) => {
     if (!request.body.option.length) {
       request.flash("error", "Please enter option");
-      return response.redirect("/todos");
+      return response.redirect("/elections");
     }
     try {
       await Options.addOption({
@@ -428,4 +493,42 @@ app.delete(
   }
 );
 
+//edit option page
+app.get(
+  "/elections/:electionID/questions/:questionID/options/:optionID/edit",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const option = await Options.getOption(request.params.optionID);
+      return response.render("edit_option", {
+        option: option.option,
+        csrfToken: request.csrfToken(),
+        electionID: request.params.electionID,
+        questionID: request.params.questionID,
+        optionID: request.params.optionID,
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//update options
+app.put(
+  "/options/:optionID/edit",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const updatedOption = await Options.updateOption({
+        id: request.params.optionID,
+        option: request.body.option,
+      });
+      return response.json(updatedOption);
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
 module.exports = app;
