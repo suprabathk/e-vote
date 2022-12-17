@@ -25,8 +25,16 @@
     <link rel="stylesheet" href="./css/style.css">
     <title><%= title %></title>
 </head>
-<body>
+<body class="bg-gray-50">
     <%- include('header.ejs') %>
+    <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
+        <span>></span>
+        <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>
+        <span>></span>
+        <a href="/elections/<%= id %>/" class="text-purple-800 hover:text-purple-600">Election</a>
+        <span>></span>
+        <a href="/elections/<%= id %>/questions" class="text-purple-800 hover:text-purple-600">Questions</a>
+    </div>
     <div class="grid grid-cols-6">
         <div class="col-start-2 col-span-4">
             <div>

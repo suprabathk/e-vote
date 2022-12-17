@@ -7,9 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
 </head>
-<body>
-    <div class="relative flex min-h-screen text-gray-800 antialiased flex-col justify-center overflow-hidden bg-gray-50 py-6 sm:py-12">
-        <div class="relative py-3 sm:w-96 mx-auto text-center">
+<body class="bg-gray-50">
+    <%- include('header.ejs') %>
+    <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
+        <span>></span>
+        <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>
+        <span>></span>
+    </div>
+    <div class=" flex text-gray-800 antialiased flex-col overflow-hidden bg-gray-50 py-6 sm:py-12">
+        <div class=" py-3 sm:w-96 mx-auto text-center">
             <span class="text-2xl font-light ">Create a new election</span>
             <div>
                 <% if (messages && messages.error && messages.error.length > 0) { %>

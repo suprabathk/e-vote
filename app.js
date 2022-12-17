@@ -232,11 +232,16 @@ app.post(
       request.user.password
     );
     if (result) {
-      Admin.findOne({ where: { email: request.user.email } }).then((user) => {
-        user.resetPass(hashedNewPwd);
-      });
-      request.flash("success", "Password changed successfully");
-      return response.redirect("/elections");
+      try {
+        Admin.findOne({ where: { email: request.user.email } }).then((user) => {
+          user.resetPass(hashedNewPwd);
+        });
+        request.flash("success", "Password changed successfully");
+        return response.redirect("/elections");
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
     } else {
       request.flash("error", "Old password does not match");
       return response.redirect("/password-reset");
@@ -307,19 +312,24 @@ app.get(
   "/elections/:id/questions",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    const election = await Election.getElection(request.params.id);
-    const questions = await Questions.getQuestions(request.params.id);
-    if (request.accepts("html")) {
-      return response.render("questions", {
-        title: election.electionName,
-        id: request.params.id,
-        questions: questions,
-        csrfToken: request.csrfToken(),
-      });
-    } else {
-      return response.json({
-        questions,
-      });
+    try {
+      const election = await Election.getElection(request.params.id);
+      const questions = await Questions.getQuestions(request.params.id);
+      if (request.accepts("html")) {
+        return response.render("questions", {
+          title: election.electionName,
+          id: request.params.id,
+          questions: questions,
+          csrfToken: request.csrfToken(),
+        });
+      } else {
+        return response.json({
+          questions,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
     }
   }
 );
@@ -430,21 +440,26 @@ app.get(
   "/elections/:id/questions/:questionID",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    const question = await Questions.getQuestion(request.params.questionID);
-    const options = await Options.getOptions(request.params.questionID);
-    if (request.accepts("html")) {
-      response.render("question_page", {
-        title: question.question,
-        description: question.description,
-        id: request.params.id,
-        questionID: request.params.questionID,
-        options,
-        csrfToken: request.csrfToken(),
-      });
-    } else {
-      return response.json({
-        options,
-      });
+    try {
+      const question = await Questions.getQuestion(request.params.questionID);
+      const options = await Options.getOptions(request.params.questionID);
+      if (request.accepts("html")) {
+        response.render("question_page", {
+          title: question.question,
+          description: question.description,
+          id: request.params.id,
+          questionID: request.params.questionID,
+          options,
+          csrfToken: request.csrfToken(),
+        });
+      } else {
+        return response.json({
+          options,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
     }
   }
 );
@@ -647,11 +662,18 @@ app.post(
       request.body.new_password,
       saltRounds
     );
-    Voter.findOne({ where: { id: request.params.voterID } }).then((user) => {
-      user.resetPass(hashedNewPwd);
-    });
-    request.flash("success", "Password changed successfully");
-    return response.redirect(`/elections/${request.params.electionID}/voters`);
+    try {
+      Voter.findOne({ where: { id: request.params.voterID } }).then((user) => {
+        user.resetPass(hashedNewPwd);
+      });
+      request.flash("success", "Password changed successfully");
+      return response.redirect(
+        `/elections/${request.params.electionID}/voters`
+      );
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
   }
 );
 

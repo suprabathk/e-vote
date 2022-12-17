@@ -7,8 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
 </head>
-<body>
+<body class="bg-gray-50">
     <%- include('header.ejs') %>
+    <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
+        <span>></span>
+        <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>
+        <span>></span>
+    </div>
     <div class="my-6 mx-10">
         <h3 class="text-4xl my-4 font-medium"><%= title %></h3>
         <div class="my-8">
