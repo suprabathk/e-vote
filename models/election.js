@@ -24,10 +24,9 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
-    static getElection(id, adminID) {
+    static getElection(id) {
       return this.findOne({
         where: {
-          adminID,
           id,
         },
       });
@@ -40,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Election.hasMany(models.Questions, {
+        foreignKey: "electionID",
+      });
+
+      Election.hasMany(models.Voter, {
         foreignKey: "electionID",
       });
     }

@@ -12,6 +12,15 @@ module.exports = (sequelize, DataTypes) => {
       return this.update({ password });
     }
 
+    static createAdmin({ firstName, lastName, email, password }) {
+      return this.create({
+        firstName,
+        lastName,
+        email,
+        password,
+      });
+    }
+
     static associate(models) {
       // define association here
       Admin.hasMany(models.Election, {
