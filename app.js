@@ -270,15 +270,28 @@ app.post(
       request.flash("error", "Election name length should be atleast 5");
       return response.redirect("/elections/create");
     }
+    if (request.body.urlString.length < 3) {
+      request.flash("error", "URL String length should be atleast 3");
+      return response.redirect("/elections/create");
+    }
+    if (
+      request.body.urlString.includes(" ") ||
+      request.body.urlString.includes("\t") ||
+      request.body.urlString.includes("\n")
+    ) {
+      request.flash("error", "URL String cannot contain spaces");
+      return response.redirect("/elections/create");
+    }
     try {
       await Election.addElection({
         electionName: request.body.electionName,
+        urlString: request.body.urlString,
         adminID: request.user.id,
       });
       return response.redirect("/elections");
     } catch (error) {
-      console.log(error);
-      return response.status(422).json(error);
+      request.flash("error", "Email ID is already in use");
+      return response.redirect("/elections/create");
     }
   }
 );
@@ -297,6 +310,7 @@ app.get(
       return response.render("election_page", {
         id: request.params.id,
         title: election.electionName,
+        urlString: election.urlString,
         running: election.running,
         nq: numberOfQuestions,
         nv: numberOfVoters,
@@ -809,11 +823,11 @@ app.put(
   }
 );
 
-app.get("/e/:electionID", async (request, response) => {
+app.get("/e/:urlString", async (request, response) => {
   try {
-    const election = await Election.getElection(request.params.electionID);
+    const election = await Election.getElectionURL(request.params.urlString);
     if (election.running) {
-      const questions = await Questions.getQuestions(request.params.electionID);
+      const questions = await Questions.getQuestions(election.id);
       let options = [];
       for (let question in questions) {
         options.push(await Options.getOptions(questions[question].id));

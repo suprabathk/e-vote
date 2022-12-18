@@ -13,6 +13,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      urlString: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
       running: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
