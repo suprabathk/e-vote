@@ -8,8 +8,15 @@
     <title><%= title %></title>
 </head>
 <body class="bg-gray-50">
-    <div class="relative flex min-h-screen text-gray-800 antialiased flex-col justify-center overflow-hidden bg-gray-50 py-6 sm:py-12">
-        <div class="relative py-3 sm:w-96 mx-auto text-center">
+    <nav>
+        <div class="container flex flex-wrap items-center justify-between mx-auto">
+          <a href="/" class="py-2 px-4 flex items-center">
+            <span class="self-center text-xl font-semibold whitespace-nowrap text-purple-800">E-Vote</span>
+          </a>
+        </div>
+    </nav>
+    <div class=" flex  text-gray-800 antialiased flex-col  overflow-hidden bg-gray-50 py-6 sm:py-12">
+        <div class=" py-3 sm:w-96 mx-auto text-center">
             <span class="text-2xl font-light ">Login to your account</span>
             <div>
                 <% if (messages && messages.error && messages.error.length > 0) { %>

@@ -135,7 +135,7 @@ app.post("/admin", async (request, response) => {
     request.flash("error", "Please enter your password");
     return response.redirect("/signup");
   }
-  if (request.body.password < 8) {
+  if (request.body.password.length < 8) {
     request.flash("error", "Password length should be atleast 8");
     return response.redirect("/signup");
   }
@@ -156,7 +156,7 @@ app.post("/admin", async (request, response) => {
       }
     });
   } catch (error) {
-    request.flash("error", error.message);
+    request.flash("error", "Email ID is already in use");
     return response.redirect("/signup");
   }
 });
@@ -352,7 +352,7 @@ app.post(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     if (request.body.question.length < 5) {
-      request.flash("error", "question length should be atleast 5");
+      request.flash("error", "Question length should be atleast 5");
       return response.redirect(
         `/elections/${request.params.id}/questions/create`
       );
@@ -399,6 +399,12 @@ app.put(
   "/questions/:questionID/edit",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
+    if (request.body.question.length < 5) {
+      request.flash("error", "Question length should be atleast 5");
+      return response.json({
+        error: "Question length should be atleast 5",
+      });
+    }
     try {
       const updatedQuestion = await Questions.updateQuestion({
         question: request.body.question,
@@ -469,9 +475,11 @@ app.post(
   "/elections/:id/questions/:questionID",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    if (!request.body.option.length) {
+    if (!request.body.option) {
       request.flash("error", "Please enter option");
-      return response.redirect("/elections");
+      return response.redirect(
+        `/elections/${request.params.id}/questions/${request.params.questionID}`
+      );
     }
     try {
       await Options.addOption({
@@ -529,6 +537,12 @@ app.put(
   "/options/:optionID/edit",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
+    if (!request.body.option) {
+      request.flash("error", "Please enter option");
+      return response.json({
+        error: "Please enter option",
+      });
+    }
     try {
       const updatedOption = await Options.updateOption({
         id: request.params.optionID,
@@ -599,6 +613,12 @@ app.post(
         `/elections/${request.params.electionID}/voters/create`
       );
     }
+    if (request.body.password.length < 8) {
+      request.flash("error", "Password length should be atleast 8");
+      return response.redirect(
+        `/elections/${request.params.electionID}/voters/create`
+      );
+    }
     const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
     try {
       await Voter.createVoter({
@@ -610,8 +630,10 @@ app.post(
         `/elections/${request.params.electionID}/voters`
       );
     } catch (error) {
-      console.log(error);
-      return response.status(422).json(error);
+      request.flash("error", "Voter ID already in use");
+      return response.redirect(
+        `/elections/${request.params.electionID}/voters/create`
+      );
     }
   }
 );
