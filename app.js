@@ -297,6 +297,7 @@ app.get(
       return response.render("election_page", {
         id: request.params.id,
         title: election.electionName,
+        running: election.running,
         nq: numberOfQuestions,
         nv: numberOfVoters,
       });
@@ -315,17 +316,22 @@ app.get(
     try {
       const election = await Election.getElection(request.params.id);
       const questions = await Questions.getQuestions(request.params.id);
-      if (request.accepts("html")) {
-        return response.render("questions", {
-          title: election.electionName,
-          id: request.params.id,
-          questions: questions,
-          csrfToken: request.csrfToken(),
-        });
+      if (!election.running) {
+        if (request.accepts("html")) {
+          return response.render("questions", {
+            title: election.electionName,
+            id: request.params.id,
+            questions: questions,
+            csrfToken: request.csrfToken(),
+          });
+        } else {
+          return response.json({
+            questions,
+          });
+        }
       } else {
-        return response.json({
-          questions,
-        });
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
       }
     } catch (error) {
       console.log(error);
@@ -339,10 +345,21 @@ app.get(
   "/elections/:id/questions/create",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    return response.render("new_question", {
-      id: request.params.id,
-      csrfToken: request.csrfToken(),
-    });
+    try {
+      const election = await Election.getElection(request.params.id);
+      if (!election.running) {
+        return response.render("new_question", {
+          id: request.params.id,
+          csrfToken: request.csrfToken(),
+        });
+      } else {
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
+      }
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
   }
 );
 
@@ -357,7 +374,13 @@ app.post(
         `/elections/${request.params.id}/questions/create`
       );
     }
+
     try {
+      const election = await Election.getElection(request.params.id);
+      if (election.running) {
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
+      }
       const question = await Questions.addQuestion({
         question: request.body.question,
         description: request.body.description,
@@ -379,6 +402,11 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     try {
+      const election = await Election.getElection(request.params.electionID);
+      if (election.running) {
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
+      }
       const question = await Questions.getQuestion(request.params.questionID);
       return response.render("edit_question", {
         electionID: request.params.electionID,
@@ -449,6 +477,11 @@ app.get(
     try {
       const question = await Questions.getQuestion(request.params.questionID);
       const options = await Options.getOptions(request.params.questionID);
+      const election = await Election.getElection(request.params.id);
+      if (election.running) {
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
+      }
       if (request.accepts("html")) {
         response.render("question_page", {
           title: question.question,
@@ -482,6 +515,11 @@ app.post(
       );
     }
     try {
+      const election = await Election.getElection(request.params.id);
+      if (election.running) {
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
+      }
       await Options.addOption({
         option: request.body.option,
         questionID: request.params.questionID,
@@ -517,6 +555,11 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     try {
+      const election = await Election.getElection(request.params.electionID);
+      if (election.running) {
+        request.flash("error", "Cannot edit while election is running");
+        return response.redirect(`/elections/${request.params.id}/`);
+      }
       const option = await Options.getOption(request.params.optionID);
       return response.render("edit_option", {
         option: option.option,
@@ -692,6 +735,73 @@ app.post(
       return response.redirect(
         `/elections/${request.params.electionID}/voters`
       );
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//election preview
+app.get(
+  "/elections/:electionID/preview",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const election = await Election.getElection(request.params.electionID);
+      const questions = await Questions.getQuestions(request.params.electionID);
+      let options = [];
+      for (let question in questions) {
+        const question_options = await Options.getOptions(
+          questions[question].id
+        );
+        if (question_options.length < 2) {
+          request.flash(
+            "error",
+            "There should be atleast two options in each question"
+          );
+          request.flash(
+            "error",
+            "Please add atleast two options to the question below"
+          );
+          return response.redirect(
+            `/elections/${request.params.electionID}/questions/${questions[question].id}`
+          );
+        }
+        options.push(question_options);
+      }
+
+      if (questions.length < 1) {
+        request.flash("error", "Please add atleast one question in the ballot");
+        return response.redirect(
+          `/elections/${request.params.electionID}/questions`
+        );
+      }
+
+      return response.render("vote_preview", {
+        title: election.electionName,
+        electionID: request.params.electionID,
+        questions,
+        options,
+        csrfToken: request.csrfToken(),
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+//launch an election
+app.put(
+  "/elections/:electionID/launch",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const launchedElection = await Election.launchElection(
+        request.params.electionID
+      );
+      return response.json(launchedElection);
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);

@@ -37,13 +37,13 @@
     </div>
     <div class="grid grid-cols-6">
         <div class="col-start-2 col-span-4">
-            <div>
+            <div class="rounded-lg px-6 py-2">
                 <% if (messages && messages.error && messages.error.length > 0) { %>
                     <% for(var i=0; i<messages.error.length; i++) { %>
-                        <p class="bg-red-100 my-3 list-none rounded px-4 py-2"><%= messages.error[i] %></p>
+                        <p class="bg-purple-100 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
                     <% } %>
                 <% } %>
-            </div>
+                </div>
             <div class="px-2 py-1">
                 <h3 class="text-2xl my-2"><%= title %></h3>
                 <p class="text-purple-800 text-md my-2"><%= description %></p>

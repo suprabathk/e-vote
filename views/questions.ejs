@@ -26,6 +26,13 @@
 </head>
 <body class="bg-gray-50">
     <%- include('header.ejs') %>
+    <div class="rounded-lg px-6 py-2">
+        <% if (messages && messages.error && messages.error.length > 0) { %>
+            <% for(var i=0; i<messages.error.length; i++) { %>
+                <p class="bg-purple-100 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
+            <% } %>
+        <% } %>
+        </div>
     <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
         <span>></span>
         <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>

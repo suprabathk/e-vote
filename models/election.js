@@ -15,6 +15,20 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static launchElection(id) {
+      return this.update(
+        {
+          running: true,
+        },
+        {
+          returning: true,
+          where: {
+            id,
+          },
+        }
+      );
+    }
+
     static getElections(adminID) {
       return this.findAll({
         where: {

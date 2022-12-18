@@ -9,6 +9,13 @@
 </head>
 <body class="bg-gray-50">
     <%- include('header.ejs') %>
+    <div class="rounded-lg px-6 py-2">
+    <% if (messages && messages.error && messages.error.length > 0) { %>
+        <% for(var i=0; i<messages.error.length; i++) { %>
+            <p class="bg-purple-100 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
+        <% } %>
+    <% } %>
+    </div>
     <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
         <span>></span>
         <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>
@@ -16,17 +23,34 @@
     </div>
     <div class="my-6 mx-10">
         <h3 class="text-4xl my-4 font-medium"><%= title %></h3>
+        <% if (running) { %>
+            <h4 class="text-2xl my-2 font-medium">Your election is launched!</h4>
+        <% } %>
         <div class="my-8">
             <h2 class="my-2 text-lg text-black flex gap-1">Your election has <span class="text-purple-600"> <%= nq %> </span> questions in the ballot</h2>
-            <a href="/elections/<%= id %>/questions" class="py-1 hover:text-purple-800 text-purple-600">Manage questions</a>
+            <% if (!running) { %>
+                <a href="/elections/<%= id %>/questions" class="py-1 hover:text-purple-800 text-purple-600">Manage questions</a>
+            <% } %>
         </div>
         <div class="my-8">
             <h2 class="my-2 text-lg text-black flex gap-1">Your election has <span class="text-purple-600"> <%= nv %> </span> registered voters.</h2>
             <a href="/elections/<%= id %>/voters" class="py-1 hover:text-purple-800 text-purple-600">Manage voters</a>
         </div>
-        <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600">
-            <a href="" class="text-white">Launch election</a>
-        </div>
+        <% if (!running) { %>
+            <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600">
+                <a href="/elections/<%= id %>/preview" class="text-white">Preview & Launch election</a>
+            </div>
+        <% } %>
+        <% if (running) { %>
+            <div class="flex gap-2">
+                <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
+                    <a href="" class="text-white">Preview results</a>
+                </div>
+                <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
+                    <a href="" class="text-white">End election</a>
+                </div>
+            </div>
+        <% } %>
     </div>
 </body>
 </html>
