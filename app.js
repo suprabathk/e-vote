@@ -809,4 +809,29 @@ app.put(
   }
 );
 
+app.get("/e/:electionID", async (request, response) => {
+  try {
+    const election = await Election.getElection(request.params.electionID);
+    if (election.running) {
+      const questions = await Questions.getQuestions(request.params.electionID);
+      let options = [];
+      for (let question in questions) {
+        options.push(await Options.getOptions(questions[question].id));
+      }
+      return response.render("vote", {
+        title: election.electionName,
+        electionID: request.params.electionID,
+        questions,
+        options,
+        csrfToken: request.csrfToken(),
+      });
+    } else {
+      return response.render("404");
+    }
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
+  }
+});
+
 module.exports = app;
