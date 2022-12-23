@@ -14,6 +14,10 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      role: {
+        type: Sequelize.STRING,
+        defaultValue: "voter",
+      },
       password: {
         type: Sequelize.STRING,
         allowNull: false,

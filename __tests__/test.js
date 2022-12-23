@@ -633,9 +633,6 @@ describe("Online voting application", function () {
     });
     const launchedElectionRes = JSON.parse(res.text);
     expect(launchedElectionRes[1][0].running).toBe(true);
-
-    res = await agent.get(`/e/${latestElection.urlString}`);
-    expect(res.statusCode).toBe(200);
   });
 
   test("Cannot edit questions after launching election", async () => {
