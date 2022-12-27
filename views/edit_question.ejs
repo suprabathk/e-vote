@@ -14,7 +14,7 @@
             let questionID = <%= questionID %>;
             let question = document.getElementById("question").value;
             let description = document.getElementById("description").value;
-            fetch(`/questions/${questionID}/edit`, {
+            fetch(`/elections/${electionID}/questions/${questionID}/edit`, {
                 method: "put",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({

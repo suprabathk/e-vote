@@ -393,6 +393,10 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         const numberOfQuestions = await Questions.getNumberOfQuestions(
           request.params.id
         );
@@ -423,6 +427,10 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         const questions = await Questions.getQuestions(request.params.id);
         if (!election.running) {
           if (request.accepts("html")) {
@@ -459,6 +467,10 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (!election.running) {
           return response.render("new_question", {
             id: request.params.id,
@@ -493,6 +505,10 @@ app.post(
 
       try {
         const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
           return response.redirect(`/elections/${request.params.id}/`);
@@ -523,6 +539,10 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
           return response.redirect(`/elections/${request.params.id}/`);
@@ -547,7 +567,7 @@ app.get(
 
 //edit question
 app.put(
-  "/questions/:questionID/edit",
+  "/elections/:electionID/questions/:questionID/edit",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     if (request.user.role === "admin") {
@@ -558,6 +578,12 @@ app.put(
         });
       }
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          return response.json({
+            error: "Invalid Election ID",
+          });
+        }
         const updatedQuestion = await Questions.updateQuestion({
           question: request.body.question,
           description: request.body.description,
@@ -581,6 +607,11 @@ app.delete(
   async (request, response) => {
     if (request.user.role === "admin") {
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         const nq = await Questions.getNumberOfQuestions(
           request.params.electionID
         );
@@ -610,6 +641,10 @@ app.get(
         const question = await Questions.getQuestion(request.params.questionID);
         const options = await Options.getOptions(request.params.questionID);
         const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
           return response.redirect(`/elections/${request.params.id}/`);
@@ -652,6 +687,10 @@ app.post(
       }
       try {
         const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
           return response.redirect(`/elections/${request.params.id}/`);
@@ -675,11 +714,16 @@ app.post(
 
 //delete options
 app.delete(
-  "/options/:optionID",
+  "/elections/:electionID/questions/:questionID/options/:optionID",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     if (request.user.role === "admin") {
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         const res = await Options.deleteOption(request.params.optionID);
         return response.json({ success: res === 1 });
       } catch (error) {
@@ -700,6 +744,10 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
           return response.redirect(`/elections/${request.params.id}/`);
@@ -724,7 +772,7 @@ app.get(
 
 //update options
 app.put(
-  "/options/:optionID/edit",
+  "/elections/:electionID/questions/:questionID/options/:optionID/edit",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     if (request.user.role === "admin") {
@@ -735,6 +783,11 @@ app.put(
         });
       }
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         const updatedOption = await Options.updateOption({
           id: request.params.optionID,
           option: request.body.option,
@@ -759,6 +812,10 @@ app.get(
       try {
         const voters = await Voter.getVoters(request.params.electionID);
         const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         if (request.accepts("html")) {
           return response.render("voters", {
             title: election.electionName,
@@ -785,13 +842,23 @@ app.get(
 app.get(
   "/elections/:electionID/voters/create",
   connectEnsureLogin.ensureLoggedIn(),
-  (request, response) => {
+  async (request, response) => {
     if (request.user.role === "admin") {
-      response.render("new_voter", {
-        title: "Add a voter to election",
-        electionID: request.params.electionID,
-        csrfToken: request.csrfToken(),
-      });
+      try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
+        response.render("new_voter", {
+          title: "Add a voter to election",
+          electionID: request.params.electionID,
+          csrfToken: request.csrfToken(),
+        });
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
     } else if (request.user.role === "voter") {
       return response.redirect("/");
     }
@@ -824,6 +891,11 @@ app.post(
       }
       const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         await Voter.createVoter({
           voterid: request.body.voterid,
           password: hashedPwd,
@@ -851,6 +923,12 @@ app.delete(
   async (request, response) => {
     if (request.user.role === "admin") {
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          return response.json({
+            error: "Invalid Election ID",
+          });
+        }
         const res = await Voter.deleteVoter(request.params.voterID);
         return response.json({ success: res === 1 });
       } catch (error) {
@@ -867,14 +945,24 @@ app.delete(
 app.get(
   "/elections/:electionID/voters/:voterID/edit",
   connectEnsureLogin.ensureLoggedIn(),
-  (request, response) => {
+  async (request, response) => {
     if (request.user.role === "admin") {
-      response.render("voter_password", {
-        title: "Reset voter password",
-        electionID: request.params.electionID,
-        voterID: request.params.voterID,
-        csrfToken: request.csrfToken(),
-      });
+      try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
+        response.render("voter_password", {
+          title: "Reset voter password",
+          electionID: request.params.electionID,
+          voterID: request.params.voterID,
+          csrfToken: request.csrfToken(),
+        });
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
     } else if (request.user.role === "voter") {
       return response.redirect("/");
     }
@@ -900,6 +988,11 @@ app.post(
         saltRounds
       );
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         Voter.findOne({ where: { id: request.params.voterID } }).then(
           (user) => {
             user.resetPass(hashedNewPwd);
@@ -927,6 +1020,10 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
         const questions = await Questions.getQuestions(
           request.params.electionID
         );
@@ -985,6 +1082,12 @@ app.put(
   async (request, response) => {
     if (request.user.role === "admin") {
       try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          return response.json({
+            error: "Invalid Election ID",
+          });
+        }
         const launchedElection = await Election.launchElection(
           request.params.electionID
         );

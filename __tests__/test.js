@@ -228,11 +228,15 @@ describe("Online voting application", function () {
       `/elections/${latestElection.id}/questions/${latestQuestion.id}/edit`
     );
     csrfToken = extractCsrfToken(res);
-    res = await agent.put(`/questions/${latestQuestion.id}/edit`).send({
-      _csrf: csrfToken,
-      question: "123",
-      description: "456",
-    });
+    res = await agent
+      .put(
+        `/elections/${latestElection.id}/questions/${latestQuestion.id}/edit`
+      )
+      .send({
+        _csrf: csrfToken,
+        question: "123",
+        description: "456",
+      });
     expect(res.statusCode).toBe(200);
   });
 
@@ -354,7 +358,9 @@ describe("Online voting application", function () {
     );
     csrfToken = extractCsrfToken(res);
     const deleteResponse = await agent
-      .delete(`/options/${latestOption.id}`)
+      .delete(
+        `/elections/${latestElection.id}/questions/${latestQuestion.id}/options/${latestOption.id}`
+      )
       .send({
         _csrf: csrfToken,
       });
@@ -366,7 +372,9 @@ describe("Online voting application", function () {
     );
     csrfToken = extractCsrfToken(res);
     const deleteResponse2 = await agent
-      .delete(`/options/${latestOption.id}`)
+      .delete(
+        `/elections/${latestElection.id}/questions/${latestQuestion.id}/options/${latestOption.id}`
+      )
       .send({
         _csrf: csrfToken,
       });
@@ -440,10 +448,14 @@ describe("Online voting application", function () {
     );
     csrfToken = extractCsrfToken(res);
 
-    res = await agent.put(`/options/${latestOption.id}/edit`).send({
-      _csrf: csrfToken,
-      option: "testoption",
-    });
+    res = await agent
+      .put(
+        `/elections/${latestElection.id}/questions/${latestQuestion.id}/options/${latestOption.id}/edit`
+      )
+      .send({
+        _csrf: csrfToken,
+        option: "testoption",
+      });
     expect(res.statusCode).toBe(200);
   });
 

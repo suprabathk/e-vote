@@ -9,7 +9,9 @@
     <script>
         var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
         function deleteOption(optionID) {
-            fetch(`/options/${optionID}`, {
+            let electionID = <%= id %>;
+            let questionID = <%= questionID %>;
+            fetch(`/elections/${electionID}/questions/${questionID}/options/${optionID}`, {
                 method: "delete",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({
