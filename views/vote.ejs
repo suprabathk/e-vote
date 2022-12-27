@@ -4,26 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<%= csrfToken %>">
     <script src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
-    <script>
-        var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-        function launchElection() {
-            let electionID = <%= electionID %>;
-            fetch(`/elections/${electionID}/launch`, {
-                method: "put",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({
-                    "_csrf":token,
-                })
-            }).then((res)=>{
-                if (res.ok) {
-                    window.location.replace(`/elections/${electionID}`);
-                }
-            }).catch((err)=> console.error(err))
-        }
-    </script>
 </head>
 <body class="bg-gray-50">
     <nav>
@@ -51,7 +33,8 @@
                 <div class="divide-y divide-solid">
                     <h2 class="px-4 py-2 text-2xl font-light ">Answer the below questions</h2>
                     <div class="pb-2 px-8">
-                        <form action="" class="divide-y divide-solid">
+                        <form action="/e/<%= urlString %>" method="post" class="divide-y divide-solid">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                             <ol class="list-decimal mb-5">
                                 <% for(let i=0; i<questions.length; i++) { %>
                                     <li class="my-2">
@@ -63,7 +46,7 @@
                                             <ol class="list-none">
                                                 <% for(let j=0; j<options[i].length; j++) { %>
                                                         <li class="option-item mt-2 cursor-pointer">
-                                                            <input type="radio" id="<%= options[i][j].id %>" class="cursor-pointer" name="answer-<%= questions[i].id %>">
+                                                            <input type="radio" id="<%= options[i][j].id %>" class="cursor-pointer" name="q-<%= questions[i].id %>" value="<%= options[i][j].id %>">
                                                             <label class="px-1 my-2 cursor-pointer" for="<%= options[i][j].id %>" class="ml-2 text-lg "><%= options[i][j].option %></label>
                                                         </li>
                                                 <% } %>
@@ -83,6 +66,5 @@
             </div>
         </div>
     </div>
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 </body>
 </html>

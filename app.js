@@ -2,7 +2,14 @@ const express = require("express");
 const app = express();
 const csrf = require("tiny-csrf");
 const cookieParser = require("cookie-parser");
-const { Admin, Election, Questions, Options, Voter } = require("./models");
+const {
+  Admin,
+  Election,
+  Questions,
+  Options,
+  Voter,
+  Answer,
+} = require("./models");
 const bodyParser = require("body-parser");
 const path = require("path");
 const bcrypt = require("bcrypt");
@@ -80,7 +87,7 @@ passport.use(
           }
         })
         .catch(() => {
-          return done(null, false, { message: "Invalid Email-ID" });
+          return done(null, false, { message: "Invalid Voter-ID" });
         });
     }
   )
@@ -249,6 +256,7 @@ app.post(
   "/e/:urlString/voter",
   passport.authenticate("Voter", {
     failureFlash: true,
+    failureRedirect: "back",
   }),
   async (request, response) => {
     return response.redirect(`/e/${request.params.urlString}`);
@@ -376,7 +384,7 @@ app.post(
         });
         return response.redirect("/elections");
       } catch (error) {
-        request.flash("error", "Email ID is already in use");
+        request.flash("error", "Election URL is already in use");
         return response.redirect("/elections/create");
       }
     } else if (request.user.role === "voter") {
@@ -1024,6 +1032,9 @@ app.get(
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
         }
+        const voters_count = await Voter.getNumberOfVoters(
+          request.params.electionID
+        );
         const questions = await Questions.getQuestions(
           request.params.electionID
         );
@@ -1055,6 +1066,16 @@ app.get(
           );
           return response.redirect(
             `/elections/${request.params.electionID}/questions`
+          );
+        }
+
+        if (voters_count < 1) {
+          request.flash(
+            "error",
+            "Please add atleast one voter to the election"
+          );
+          return response.redirect(
+            `/elections/${request.params.electionID}/voters`
           );
         }
 
@@ -1107,6 +1128,11 @@ app.get("/e/:urlString/", async (request, response) => {
     request.flash("error", "Please login before trying to Vote");
     return response.redirect(`/e/${request.params.urlString}/voter`);
   }
+  if (request.user.voted) {
+    console.log(request.user.voted);
+    request.flash("error", "You have voted successfully");
+    return response.render("thankyou");
+  }
   try {
     const election = await Election.getElectionURL(request.params.urlString);
     if (request.user.role === "voter") {
@@ -1121,6 +1147,7 @@ app.get("/e/:urlString/", async (request, response) => {
           electionID: election.id,
           questions,
           options,
+          urlString: request.params.urlString,
           csrfToken: request.csrfToken(),
         });
       } else {
@@ -1130,6 +1157,37 @@ app.get("/e/:urlString/", async (request, response) => {
       request.flash("error", "You cannot vote as Admin");
       request.flash("error", "Please signout as Admin before trying to vote");
       return response.redirect(`/elections/${election.id}`);
+    }
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
+  }
+});
+
+app.post("/e/:urlString", async (request, response) => {
+  if (!request.user) {
+    request.flash("error", "Please login before trying to Vote");
+    return response.redirect(`/e/${request.params.urlString}/voter`);
+  }
+  if (request.user.voted) {
+    console.log(request.user.voted);
+    request.flash("error", "You have voted successfully");
+    return response.render("thankyou");
+  }
+  try {
+    let election = await Election.getElectionURL(request.params.urlString);
+    let questions = await Questions.getQuestions(election.id);
+    for (let question of questions) {
+      let qid = `q-${question.id}`;
+      let selectedOption = request.body[qid];
+      await Answer.addAnswer({
+        voterID: request.user.id,
+        electionID: election.id,
+        questionID: question.id,
+        selectedOption: selectedOption,
+      });
+      await Voter.markAsVoted(request.user.id);
+      return response.redirect(`/e/${request.params.urlString}`);
     }
   } catch (error) {
     console.log(error);

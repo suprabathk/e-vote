@@ -21,6 +21,19 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static async markAsVoted(id) {
+      return await this.update(
+        {
+          voted: true,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+    }
+
     static async getNumberOfVoters(electionID) {
       return await this.count({
         where: {

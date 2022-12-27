@@ -478,7 +478,7 @@ describe("Online voting application", function () {
     const electionCount = parsedGroupedResponse.elections.length;
     const latestElection = parsedGroupedResponse.elections[electionCount - 1];
 
-    //add a question
+    //add a voter
     res = await agent.get(`/elections/${latestElection.id}/voters/create`);
     csrfToken = extractCsrfToken(res);
     res = await agent
@@ -634,7 +634,16 @@ describe("Online voting application", function () {
         _csrf: csrfToken,
         option: "Test option",
       });
-
+    //add a voter
+    res = await agent.get(`/elections/${latestElection.id}/voters/create`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/voters/create`)
+      .send({
+        voterid: "Test voter1",
+        password: "Test password",
+        _csrf: csrfToken,
+      });
     res = await agent.get(`/elections/${latestElection.id}/preview`);
     csrfToken = extractCsrfToken(res);
 
@@ -707,6 +716,17 @@ describe("Online voting application", function () {
       .send({
         _csrf: csrfToken,
         option: "Test option",
+      });
+
+    //add a voter
+    res = await agent.get(`/elections/${latestElection.id}/voters/create`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/voters/create`)
+      .send({
+        voterid: "Test voter2",
+        password: "Test password",
+        _csrf: csrfToken,
       });
 
     //can edit questions while election is not running
