@@ -30,6 +30,21 @@ module.exports = (sequelize, DataTypes) => {
       );
     }
 
+    static endElection(id) {
+      return this.update(
+        {
+          running: false,
+          ended: true,
+        },
+        {
+          returning: true,
+          where: {
+            id,
+          },
+        }
+      );
+    }
+
     static getElections(adminID) {
       return this.findAll({
         where: {
@@ -66,6 +81,10 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Election.hasMany(models.Voter, {
+        foreignKey: "electionID",
+      });
+
+      Election.hasMany(models.Answer, {
         foreignKey: "electionID",
       });
     }

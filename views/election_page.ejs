@@ -4,8 +4,26 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrfToken %>">
     <script src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
+    <script>
+        var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+        function endElection() {
+            let electionID = <%= id %>;
+            fetch(`/elections/${electionID}/end`, {
+                method: "put",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({
+                    "_csrf":token,
+                })
+            }).then((res)=>{
+                if (res.ok) {
+                    window.location.replace(`/elections/${electionID}`);
+                }
+            }).catch((err)=> console.error(err))
+        }
+    </script>
 </head>
 <body class="bg-gray-50">
     <%- include('header.ejs') %>
@@ -50,9 +68,9 @@
                 <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
                     <a href="" class="text-white">Preview results</a>
                 </div>
-                <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
-                    <a href="" class="text-white">End election</a>
-                </div>
+                <button onclick="endElection()" class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
+                    <p class="text-white">End election</p>
+                </button>
             </div>
         <% } %>
     </div>
