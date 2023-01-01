@@ -510,13 +510,24 @@ describe("Online voting application", function () {
     const electionCount = parsedGroupedResponse.elections.length;
     const latestElection = parsedGroupedResponse.elections[electionCount - 1];
 
-    //add a question
+    //add a voter
     res = await agent.get(`/elections/${latestElection.id}/voters/create`);
     csrfToken = extractCsrfToken(res);
     res = await agent
       .post(`/elections/${latestElection.id}/voters/create`)
       .send({
         voterid: "Test voter1",
+        password: "Test password",
+        _csrf: csrfToken,
+      });
+
+    //add a voter
+    res = await agent.get(`/elections/${latestElection.id}/voters/create`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/voters/create`)
+      .send({
+        voterid: "Test voter2",
         password: "Test password",
         _csrf: csrfToken,
       });
@@ -640,10 +651,11 @@ describe("Online voting application", function () {
     res = await agent
       .post(`/elections/${latestElection.id}/voters/create`)
       .send({
-        voterid: "Test voter1",
+        voterid: "Test voter8",
         password: "Test password",
         _csrf: csrfToken,
       });
+
     res = await agent.get(`/elections/${latestElection.id}/preview`);
     csrfToken = extractCsrfToken(res);
 

@@ -74,9 +74,11 @@ passport.use(
     {
       usernameField: "voterid",
       passwordField: "password",
+      passReqToCallback: true,
     },
-    (username, password, done) => {
-      Voter.findOne({ where: { voterid: username } })
+    async (request, username, password, done) => {
+      const election = await Election.getElectionURL(request.params.urlString);
+      Voter.findOne({ where: { voterid: username, electionID: election.id } })
         .then(async (user) => {
           const result = await bcrypt.compare(password, user.password);
           if (result) {
@@ -231,11 +233,15 @@ app.get("/login", (request, response) => {
 //voter login page
 app.get("/e/:urlString/voter", async (request, response) => {
   try {
+    if (request.user) {
+      return response.redirect(`/e/${request.params.urlString}`);
+    }
     const election = await Election.getElectionURL(request.params.urlString);
     if (election.running && !election.ended) {
       return response.render("voter_login", {
         title: "Login in as Voter",
         urlString: request.params.urlString,
+        electionID: election.id,
         csrfToken: request.csrfToken(),
       });
     } else {
@@ -467,7 +473,11 @@ app.get(
             });
           }
         } else {
-          request.flash("error", "Cannot edit while election is running");
+          if (election.ended) {
+            request.flash("error", "Cannot edit when election has ended");
+          } else if (election.running) {
+            request.flash("error", "Cannot edit while election is running");
+          }
           return response.redirect(`/elections/${request.params.id}/`);
         }
       } catch (error) {
@@ -881,6 +891,10 @@ app.get(
       try {
         const voters = await Voter.getVoters(request.params.electionID);
         const election = await Election.getElection(request.params.electionID);
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.electionID}/`);
+        }
         if (request.user.id !== election.adminID) {
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
@@ -918,6 +932,10 @@ app.get(
         if (request.user.id !== election.adminID) {
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
+        }
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         response.render("new_voter", {
           title: "Add a voter to election",
@@ -965,6 +983,10 @@ app.post(
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
         }
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.electionID}/`);
+        }
         await Voter.createVoter({
           voterid: request.body.voterid,
           password: hashedPwd,
@@ -998,8 +1020,20 @@ app.delete(
             error: "Invalid Election ID",
           });
         }
-        const res = await Voter.deleteVoter(request.params.voterID);
-        return response.json({ success: res === 1 });
+        if (election.ended) {
+          return response.json("Cannot edit when election has ended");
+        }
+        const nv = await Voter.getNumberOfVoters(request.params.electionID);
+        if (nv > 1) {
+          const voter = await Voter.getVoter(request.params.voterID);
+          if (voter.voted) {
+            return response.json("Voter has already voted, Cannot delete now");
+          }
+          const res = await Voter.deleteVoter(request.params.voterID);
+          return response.json({ success: res === 1 });
+        } else {
+          return response.json({ success: false });
+        }
       } catch (error) {
         console.log(error);
         return response.status(422).json(error);
@@ -1018,9 +1052,20 @@ app.get(
     if (request.user.role === "admin") {
       try {
         const election = await Election.getElection(request.params.electionID);
+        const voter = await Voter.getVoter(request.params.voterID);
+        if (voter.voted) {
+          request.flash("error", "Voter has already submitted their vote");
+          return response.redirect(
+            `/elections/${request.params.electionID}/voters`
+          );
+        }
         if (request.user.id !== election.adminID) {
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
+        }
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         response.render("voter_password", {
           title: "Reset voter password",
@@ -1062,6 +1107,10 @@ app.post(
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
         }
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.electionID}/`);
+        }
         Voter.findOne({ where: { id: request.params.voterID } }).then(
           (user) => {
             user.resetPass(hashedNewPwd);
@@ -1092,6 +1141,10 @@ app.get(
         if (request.user.id !== election.adminID) {
           request.flash("error", "Invalid election ID");
           return response.redirect("/elections");
+        }
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         const voters_count = await Voter.getNumberOfVoters(
           request.params.electionID
@@ -1223,9 +1276,8 @@ app.get("/e/:urlString/", async (request, response) => {
     return response.redirect(`/e/${request.params.urlString}/voter`);
   }
   if (request.user.voted) {
-    console.log(request.user.voted);
     request.flash("error", "You have voted successfully");
-    return response.render("thankyou");
+    return response.redirect(`/e/${request.params.urlString}/results`);
   }
   try {
     const election = await Election.getElectionURL(request.params.urlString);
@@ -1267,15 +1319,14 @@ app.post("/e/:urlString", async (request, response) => {
     return response.redirect(`/e/${request.params.urlString}/voter`);
   }
   if (request.user.voted) {
-    console.log(request.user.voted);
     request.flash("error", "You have voted successfully");
-    return response.render("thankyou");
+    return response.redirect(`/e/${request.params.urlString}/results`);
   }
   try {
     let election = await Election.getElectionURL(request.params.urlString);
     if (election.ended) {
       request.flash("error", "Cannot vote when election has ended");
-      return response.redirect(`/elections/${request.params.id}/result`);
+      return response.redirect(`/elections/${request.params.id}/results`);
     }
     let questions = await Questions.getQuestions(election.id);
     for (let question of questions) {
@@ -1288,7 +1339,37 @@ app.post("/e/:urlString", async (request, response) => {
         selectedOption: selectedOption,
       });
       await Voter.markAsVoted(request.user.id);
-      return response.redirect(`/e/${request.params.urlString}`);
+      return response.redirect(`/e/${request.params.urlString}/results`);
+    }
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
+  }
+});
+
+app.get("/e/:urlString/results", async (request, response) => {
+  if (!request.user) {
+    request.flash("error", "Please login before viewing results");
+    return response.redirect(`/e/${request.params.urlString}/voter`);
+  }
+  try {
+    const election = await Election.getElectionURL(request.params.urlString);
+    if (request.user.role === "voter") {
+      if (!election.ended) {
+        return response.render("thankyou");
+      }
+      if (!request.user.voted) {
+        request.flash("error", "You have not completed your vote");
+        request.flash("error", "Please vote to view results");
+        return response.redirect(`/e/${request.params.urlString}`);
+      }
+      return response.render("result");
+    } else if (request.user.role === "admin") {
+      if (request.user.id !== election.adminID) {
+        request.flash("error", "Invalid election ID");
+        return response.redirect("/elections");
+      }
+      return response.render("result");
     }
   } catch (error) {
     console.log(error);
