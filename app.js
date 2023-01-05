@@ -237,17 +237,12 @@ app.get("/e/:urlString/voter", async (request, response) => {
       return response.redirect(`/e/${request.params.urlString}`);
     }
     const election = await Election.getElectionURL(request.params.urlString);
-    if (election.running && !election.ended) {
-      return response.render("voter_login", {
-        title: "Login in as Voter",
-        urlString: request.params.urlString,
-        electionID: election.id,
-        csrfToken: request.csrfToken(),
-      });
-    } else {
-      request.flash("Election has ended");
-      return response.render("result");
-    }
+    return response.render("voter_login", {
+      title: "Login in as Voter",
+      urlString: request.params.urlString,
+      electionID: election.id,
+      csrfToken: request.csrfToken(),
+    });
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -421,7 +416,7 @@ app.get(
           return response.redirect("/elections");
         }
         if (election.ended) {
-          return response.render("result");
+          return response.redirect(`/elections/${election.id}/results`);
         }
         const numberOfQuestions = await Questions.getNumberOfQuestions(
           request.params.id
@@ -435,6 +430,59 @@ app.get(
           nq: numberOfQuestions,
           nv: numberOfVoters,
           csrfToken: request.csrfToken(),
+        });
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
+    } else if (request.user.role === "voter") {
+      return response.redirect("/");
+    }
+  }
+);
+
+//election results page
+app.get(
+  "/elections/:id/results",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    if (request.user.role === "admin") {
+      try {
+        const election = await Election.getElection(request.params.id);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
+        const questions = await Questions.getQuestions(election.id);
+        const answers = await Answer.getAnswers(election.id);
+        let options = [];
+        let optionsCount = [];
+        for (let question in questions) {
+          let opts = await Options.getOptions(questions[question].id);
+          options.push(opts);
+          let opts_count = [];
+          for (let opt in opts) {
+            opts_count.push(
+              await Answer.getOptionCount({
+                electionID: election.id,
+                selectedOption: opts[opt].id,
+                questionID: questions[question].id,
+              })
+            );
+          }
+          optionsCount.push(opts_count);
+        }
+        const noOfVoted = await Voter.countVoted(election.id);
+        const noOfVotePending = await Voter.countVotePending(election.id);
+        const totalVoters = noOfVoted + noOfVotePending;
+        return response.render("results_admin", {
+          answers,
+          questions,
+          options,
+          optionsCount,
+          noOfVoted,
+          noOfVotePending,
+          totalVoters,
         });
       } catch (error) {
         console.log(error);
@@ -1282,7 +1330,7 @@ app.get("/e/:urlString/", async (request, response) => {
   try {
     const election = await Election.getElectionURL(request.params.urlString);
     if (election.ended) {
-      return response.redirect(`/elections/${request.params.id}/result`);
+      return response.redirect(`/e/${election.urlString}/results`);
     }
     if (request.user.role === "voter") {
       if (election.running) {
@@ -1338,9 +1386,9 @@ app.post("/e/:urlString", async (request, response) => {
         questionID: question.id,
         selectedOption: selectedOption,
       });
-      await Voter.markAsVoted(request.user.id);
-      return response.redirect(`/e/${request.params.urlString}/results`);
     }
+    await Voter.markAsVoted(request.user.id);
+    return response.redirect(`/e/${request.params.urlString}/results`);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -1348,29 +1396,43 @@ app.post("/e/:urlString", async (request, response) => {
 });
 
 app.get("/e/:urlString/results", async (request, response) => {
-  if (!request.user) {
-    request.flash("error", "Please login before viewing results");
-    return response.redirect(`/e/${request.params.urlString}/voter`);
-  }
   try {
     const election = await Election.getElectionURL(request.params.urlString);
-    if (request.user.role === "voter") {
-      if (!election.ended) {
-        return response.render("thankyou");
-      }
-      if (!request.user.voted) {
-        request.flash("error", "You have not completed your vote");
-        request.flash("error", "Please vote to view results");
-        return response.redirect(`/e/${request.params.urlString}`);
-      }
-      return response.render("result");
-    } else if (request.user.role === "admin") {
-      if (request.user.id !== election.adminID) {
-        request.flash("error", "Invalid election ID");
-        return response.redirect("/elections");
-      }
-      return response.render("result");
+    if (!election.ended) {
+      return response.render("thankyou");
     }
+    const questions = await Questions.getQuestions(election.id);
+    const answers = await Answer.getAnswers(election.id);
+    let options = [];
+    let optionsCount = [];
+    for (let question in questions) {
+      let opts = await Options.getOptions(questions[question].id);
+      options.push(opts);
+      let opts_count = [];
+      for (let opt in opts) {
+        opts_count.push(
+          await Answer.getOptionCount({
+            electionID: election.id,
+            selectedOption: opts[opt].id,
+            questionID: questions[question].id,
+          })
+        );
+      }
+      console.log(opts_count);
+      optionsCount.push(opts_count);
+    }
+    const noOfVoted = await Voter.countVoted(election.id);
+    const noOfVotePending = await Voter.countVotePending(election.id);
+    const totalVoters = noOfVoted + noOfVotePending;
+    return response.render("result", {
+      answers,
+      questions,
+      options,
+      optionsCount,
+      noOfVoted,
+      noOfVotePending,
+      totalVoters,
+    });
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);

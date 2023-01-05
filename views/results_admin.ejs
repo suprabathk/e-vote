@@ -8,13 +8,11 @@
     <title>Election result</title>
 </head>
 <body class="bg-gray-50">
-    <nav>
-        <div class="container flex flex-wrap items-center justify-between mx-auto">
-          <a href="/" class="py-2 px-4 flex items-center">
-            <span class="self-center text-xl font-semibold whitespace-nowrap text-purple-800">E-Vote</span>
-          </a>
-        </div>
-    </nav>
+    <%- include('header.ejs') %>
+    <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
+        <span>></span>
+        <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>
+    </div>
     <div class=" flex  text-gray-800 antialiased flex-col  overflow-hidden bg-gray-50 py-6 sm:py-12 px-20">
         <div class="w-full">
             <div>

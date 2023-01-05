@@ -41,6 +41,7 @@ module.exports = {
 
     await queryInterface.addColumn("Answers", "selectedOption", {
       type: Sequelize.DataTypes.INTEGER,
+      allowNull: false,
     });
     await queryInterface.addConstraint("Answers", {
       fields: ["selectedOption"],
