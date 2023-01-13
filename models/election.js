@@ -70,6 +70,14 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static deleteElection(id) {
+      return this.destroy({
+        where: {
+          id,
+        },
+      });
+    }
+
     static associate(models) {
       // define association here
       Election.belongsTo(models.Admin, {
@@ -78,14 +86,17 @@ module.exports = (sequelize, DataTypes) => {
 
       Election.hasMany(models.Questions, {
         foreignKey: "electionID",
+        onDelete: "CASCADE",
       });
 
       Election.hasMany(models.Voter, {
         foreignKey: "electionID",
+        onDelete: "CASCADE",
       });
 
       Election.hasMany(models.Answer, {
         foreignKey: "electionID",
+        onDelete: "CASCADE",
       });
     }
   }

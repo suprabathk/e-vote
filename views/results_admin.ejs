@@ -11,7 +11,7 @@
         let optionsL = null;
         let optionsCount = null;
     </script>
-    <title>Election result</title>
+    <title><%= electionName %> - Results</title>
 </head>
 <body class="bg-gray-50">
     <%- include('header.ejs') %>
@@ -29,7 +29,7 @@
                 <% } %>
             </div>
             <div class="flex flex-col gap-6 divide-y-2 divide-purple-200">
-                <span class="text-5xl font-light mb-8">Election result</span>
+                <span class="text-5xl font-light mb-8"><%= electionName %> - Results</span>
                 <div class="flex py-10">
                 <span class="text-3xl font-semibold ">Voting status:</span>
                 <div class="w-60">

@@ -154,6 +154,7 @@ app.get(
           response.render("elections", {
             title: "Online Voting Platform",
             userName: loggedinuser,
+            csrfToken: request.csrfToken(),
             elections,
           });
         } else {
@@ -441,6 +442,33 @@ app.get(
   }
 );
 
+//delete election
+app.delete(
+  "/elections/:electionID",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    if (request.user.role === "admin") {
+      try {
+        const election = await Election.getElection(request.params.electionID);
+        if (election.running) {
+          return response.json("Cannot delete while election is running");
+        }
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
+        const res = await Election.deleteElection(request.params.electionID);
+        return response.json({ success: res === 1 });
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
+    } else if (request.user.role === "voter") {
+      return response.redirect("/");
+    }
+  }
+);
+
 //election results page
 app.get(
   "/elections/:id/results",
@@ -480,6 +508,7 @@ app.get(
         const noOfVotePending = await Voter.countVotePending(election.id);
         const totalVoters = noOfVoted + noOfVotePending;
         return response.render("results_admin", {
+          electionName: election.electionName,
           answers,
           questions,
           options,
@@ -1451,6 +1480,7 @@ app.get("/e/:urlString/results", async (request, response) => {
     const noOfVotePending = await Voter.countVotePending(election.id);
     const totalVoters = noOfVoted + noOfVotePending;
     return response.render("result", {
+      electionName: election.electionName,
       answers,
       questions,
       options,

@@ -89,10 +89,12 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Voter.belongsTo(models.Election, {
         foreignKey: "electionID",
+        onDelete: "CASCADE",
       });
 
       Voter.hasMany(models.Answer, {
         foreignKey: "voterID",
+        onDelete: "CASCADE",
       });
     }
   }

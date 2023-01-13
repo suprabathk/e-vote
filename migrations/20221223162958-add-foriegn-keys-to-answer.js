@@ -29,10 +29,12 @@ module.exports = {
 
     await queryInterface.addColumn("Answers", "questionID", {
       type: Sequelize.DataTypes.INTEGER,
+      onDelete: "CASCADE",
     });
     await queryInterface.addConstraint("Answers", {
       fields: ["questionID"],
       type: "foreign key",
+      onDelete: "CASCADE",
       references: {
         table: "Questions",
         field: "id",
