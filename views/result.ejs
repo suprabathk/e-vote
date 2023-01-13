@@ -21,16 +21,16 @@
           </a>
         </div>
     </nav>
-    <div class=" flex  text-gray-800 antialiased flex-col  overflow-hidden bg-gray-50 py-6 sm:py-12 px-20">
+    <div class=" flex  text-white antialiased flex-col  overflow-hidden py-6 sm:py-12 px-20">
       <div class="w-full">
           <div>
               <% if (messages && messages.error && messages.error.length > 0) { %>
                   <% for(var i=0; i<messages.error.length; i++) { %>
-                      <p class="bg-purple-100 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
+                      <p class="bg-gray-600 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
                   <% } %>
               <% } %>
           </div>
-          <div class="flex flex-col gap-6 divide-y-2 divide-purple-200">
+          <div class="flex flex-col gap-6 divide-y-2 divide-white">
               <span class="text-5xl font-light mb-8"><%= electionName %> - Results</span>
               <div class="flex py-10">
               <span class="text-3xl font-semibold ">Voting status:</span>
@@ -48,26 +48,26 @@
                       datasets: [{
                         data: [completed,pending],
                         backgroundColor: [
-                          'rgb(107, 33, 168)',
-                          'rgb(192, 132, 252)'
+                          'rgb(129, 140, 248)',
+                          'rgb(55, 48, 163)'
                           ],
                       }]
                     }
                   });
                 </script>
                 </div>
-              <ol class="list-decimal mb-5">
+              <ol class="list-decimal mb-5 text-3xl">
                   <% for(let i=0; i<questions.length; i++) { %>
                       <li class="my-2">
                           <div class="flex justify-between my-10">
                           <div class="px-2 py-1">
-                              <h3 class="text-2xl my-2"><%= questions[i].question %></h3>
-                              <p class="text-md my-2"><%= questions[i].description %></p>
+                              <h3 class="text-3xl my-2"><%= questions[i].question %></h3>
+                              <p class="text-lg my-2"><%= questions[i].description %></p>
                               <div class="ml-8">
                                   <ol class="list-none">
                                       <% for(let j=0; j<options[i].length; j++) { %>
-                                              <li class="option-item mt-2">
-                                                  <label class="px-1 my-2" class="ml-2 text-lg "><span class="text-purple-800"><%= options[i][j].option %></span> got <span class="text-purple-800"><%= optionsCount[i][j] %></span> votes</label>
+                                              <li class="option-item mt-2 text-2xl">
+                                                  <label class="ml-2 text-xl px-1 my-2 text-gray-400"><span class="text-white"><%= options[i][j].option %></span> got <span class="text-white"><%= optionsCount[i][j] %></span> votes</label>
                                               </li>
                                       <% } %>
                                   </ol>
@@ -81,7 +81,6 @@
                               ctx = document.getElementById('myChart-<%= i %>');
                               optionsCount = "<%= optionsCount[i] %>".split(",");
                               optionsL = "<%= optionLabels[i] %>".split(",");
-                              console.log(optionsCount);
                               new Chart(ctx, {
                                 type: 'bar',
                                 data: {
@@ -90,7 +89,7 @@
                                     label: '# of Votes',
                                     data: optionsCount,
                                     borderWidth: 1,
-                                    backgroundColor: '#9333EA',
+                                    backgroundColor: 'rgb(129, 140, 248)',
                                   }]
                                 },
                                 options: {

@@ -25,51 +25,63 @@
         }
     </script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <%- include('header.ejs') %>
     <div class="rounded-lg px-6 py-2">
     <% if (messages && messages.error && messages.error.length > 0) { %>
         <% for(var i=0; i<messages.error.length; i++) { %>
-            <p class="bg-purple-100 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
+            <p class="bg-gray-600 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
         <% } %>
     <% } %>
     </div>
-    <div class="flex gap-1 mx-10 mt-6 bg-gray-50">
+    <div class="flex gap-1 mx-10 mt-6 text-white">
         <span>></span>
-        <a href="/elections" class="text-purple-800 hover:text-purple-600">All Elections</a>
+        <a href="/elections" class="text-gray-400 hover:text-white transition-all">All Elections</a>
         <span>></span>
     </div>
-    <div class="my-6 mx-10">
-        <h3 class="text-4xl my-4 font-medium"><%= title %></h3>
+    <div class="my-6 mx-10 text-white">
+        <h3 class="text-6xl my-7 font-medium"><%= title %></h3>
         <% if (running) { %>
-            <div class="py-4">
-                <h4 class="text-2xl my-2 font-medium">Your election is launched!</h4>
-                <h2 class="my-2 text-lg text-black flex gap-1">Voters can vote from this url:</h2>
-                <a href="/e/<%= urlString %>/" class="py-1 hover:text-purple-800 text-purple-600">https://e-vote.onrender.com/e/<%= urlString %></a>
+            <div class="py-2">
+                <h4 class="text-3xl my-2 font-medium text-gray-400">Your election is launched!</h4>
+                <h2 class="my-2 text-xl flex gap-1 text-gray-400">Voters can vote from this url:</h2>
+                <a href="/e/<%= urlString %>/" class="py-1 hover:text-gray-400 hover:underline text-white">https://e-vote.onrender.com/e/<%= urlString %></a>
             </div>
         <% } %>
         <div class="mt-4">
-            <h2 class="my-2 text-lg text-black flex gap-1">Your election has <span class="text-purple-600"> <%= nq %> </span> questions in the ballot</h2>
+            <h2 class="my-4 text-2xl text-gray-400 flex gap-2">Your election has <span class="text-white"> <%= nq %> </span> questions in the ballot.</h2>
             <% if (!running) { %>
-                <a href="/elections/<%= id %>/questions" class="py-1 hover:text-purple-800 text-purple-600">Manage questions</a>
+                <a href="/elections/<%= id %>/questions" class="hover:text-gray-400 hover:underline text-lg ">Manage questions</a>
+           
             <% } %>
         </div>
-        <div class="mb-8 bt-4">
-            <h2 class="my-2 text-lg text-black flex gap-1">Your election has <span class="text-purple-600"> <%= nv %> </span> registered voters.</h2>
-            <a href="/elections/<%= id %>/voters" class="py-1 hover:text-purple-800 text-purple-600">Manage voters</a>
+        <div class="mb-6 bt-4">
+            <h2 class="my-4 text-2xl text-gray-400 flex gap-2">Your election has <span class="text-white"> <%= nv %> </span> registered voters.</h2>
+            <a href="/elections/<%= id %>/voters" class="hover:text-gray-400 hover:underline text-lg pr-6">Manage voters</a>
         </div>
         <% if (!running) { %>
-            <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600">
-                <a href="/elections/<%= id %>/preview" class="text-white">Preview & Launch election</a>
+            <div class="flex items-center gap-2 mt-6 w-fit bg-gray-500 border border-white text-white py-2 px-6 rounded-md hover:bg-white hover:text-black transition-all ease-linear text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>                  
+                <a href="/elections/<%= id %>/preview" >Preview & Launch election</a>
             </div>
         <% } %>
         <% if (running) { %>
             <div class="flex gap-2">
-                <div class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
-                    <a href="/elections/<%= id %>/results" class="text-white">Preview results</a>
+                <div class="py-2 flex items-center gap-2 w-fit bg-gray-500 border border-white text-white px-6 rounded-md hover:bg-white hover:text-black transition-all ease-linear">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>                      
+                    <a href="/elections/<%= id %>/results">Preview results</a>
                 </div>
-                <button onclick="endElection()" class="bg-purple-800 rounded w-fit px-4 py-1 hover:bg-purple-600 ease-linear transition-all duration-150">
-                    <p class="text-white">End election</p>
+                <button onclick="endElection()" class="py-2 flex gap-2 items-center gap-2 w-fit bg-gray-500 border border-white text-white px-6 rounded-md hover:bg-white hover:text-black transition-all ease-linear">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>                      
+                    <p>End election</p>
                 </button>
             </div>
         <% } %>

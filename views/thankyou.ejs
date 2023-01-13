@@ -7,26 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Results page</title>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <nav>
         <div class="container flex flex-wrap items-center justify-between mx-auto">
           <a href="/" class="py-2 px-4 flex items-center">
-            <span class="self-center text-xl font-semibold whitespace-nowrap text-purple-800">E-Vote</span>
+            <span class="self-center text-xl font-semibold whitespace-nowrap text-white">E-Vote</span>
           </a>
         </div>
     </nav>
-    <div class=" flex  text-gray-800 antialiased flex-col  overflow-hidden bg-gray-50 py-6 sm:py-12 px-20">
+    <div class=" flex  text-white antialiased flex-col  overflow-hidden  py-6 sm:py-12 px-20">
         <div class="w-full">
             <div>
                 <% if (messages && messages.error && messages.error.length > 0) { %>
                     <% for(var i=0; i<messages.error.length; i++) { %>
-                        <p class="bg-purple-100 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
+                        <p class="bg-gray-600 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
                     <% } %>
                 <% } %>
             </div>
-            <div class="flex flex-col gap-6">
-                <span class="text-2xl font-medium">Election has not ended yet!</span>
-                <span class="text-2xl font-medium">Come back to same page for results after the election ends</span>
+            <div class="grid grid-cols-12 items-center mt-10">
+                <div class="flex flex-col gap-6 col-start-2 col-span-6">
+                    <span class="text-4xl font-medium">Election has not ended yet!</span>
+                    <span class="text-2xl font-medium">Come back to same page for results after the election ends</span>
+                </div>
+                <div class="hidden md:block col-span-4 col-start-8">
+                    <img src="/images/election_running.svg" alt="hero image">
+                </div>
             </div>
         </div>
     </div>

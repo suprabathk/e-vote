@@ -1525,6 +1525,7 @@ app.post("/e/:urlString", async (request, response) => {
         });
       }
       await Voter.markAsVoted(request.user.id);
+      request.flash("error", "You have voted successfully!");
       return response.redirect(`/e/${request.params.urlString}/results`);
     } else if (request.user.role === "admin") {
       request.logout(() => {});
