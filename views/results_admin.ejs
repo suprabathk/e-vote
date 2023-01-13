@@ -5,6 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let ctx = null;
+        let optionsL = null;
+        let optionsCount = null;
+    </script>
     <title>Election result</title>
 </head>
 <body class="bg-gray-50">
@@ -22,29 +28,79 @@
                     <% } %>
                 <% } %>
             </div>
-            <div class="flex flex-col gap-6">
-                <span class="text-5xl font-light ">Election result</span>
-                <% for (let i of answers) { %>
-                    <span class="text-5xl font-light "><%= i.voterID %></span>
-                <% } %>
-                <span class="text-5xl font-light "><%= optionsCount %></span>
+            <div class="flex flex-col gap-6 divide-y-2 divide-purple-200">
+                <span class="text-5xl font-light mb-8">Election result</span>
+                <div class="flex py-10">
+                <span class="text-3xl font-semibold ">Voting status:</span>
+                <div class="w-60">
+                    <canvas class="object-contain" id="votes"></canvas>
+                  </div>
+                  <script>
+                    ctx = document.getElementById('votes');
+                    completed = "<%= noOfVoted %>";
+                    pending = "<%= noOfVotePending %>";
+                    new Chart(ctx, {
+                      type: 'pie',
+                      data: {
+                        labels: ["Completed voters", "Pending voters"],
+                        datasets: [{
+                          data: [completed,pending],
+                          backgroundColor: [
+                            'rgb(107, 33, 168)',
+                            'rgb(192, 132, 252)'
+                            ],
+                        }]
+                      }
+                    });
+                  </script>
+                  </div>
                 <ol class="list-decimal mb-5">
                     <% for(let i=0; i<questions.length; i++) { %>
                         <li class="my-2">
+                            <div class="flex justify-between my-10">
                             <div class="px-2 py-1">
                                 <h3 class="text-2xl my-2"><%= questions[i].question %></h3>
-                                <p class="text-purple-800 text-md my-2"><%= questions[i].description %></p>
+                                <p class="text-md my-2"><%= questions[i].description %></p>
+                                <div class="ml-8">
+                                    <ol class="list-none">
+                                        <% for(let j=0; j<options[i].length; j++) { %>
+                                                <li class="option-item mt-2">
+                                                    <label class="px-1 my-2" class="ml-2 text-lg "><span class="text-purple-800"><%= options[i][j].option %></span> got <span class="text-purple-800"><%= optionsCount[i][j] %></span> votes</label>
+                                                </li>
+                                        <% } %>
+                                    </ol>
+                                </div>
                             </div>
-                            <div class="ml-8">
-                                <ol class="list-none">
-                                    <% for(let j=0; j<options[i].length; j++) { %>
-                                            <li class="option-item mt-2">
-                                                <label class="px-1 my-2" class="ml-2 text-lg "><%= options[i][j].option %></label>
-                                                <label class="px-1 my-2"  class="ml-2 text-lg "><%= optionsCount[i][j] %></label>
-                                            </li>
-                                    <% } %>
-                                </ol>
+                            <div class="w-80">
+                                <canvas class="object-contain" id="myChart-<%= i %>"></canvas>
+                              </div>
                             </div>
+                              <script>
+                                ctx = document.getElementById('myChart-<%= i %>');
+                                optionsCount = "<%= optionsCount[i] %>".split(",");
+                                optionsL = "<%= optionLabels[i] %>".split(",");
+                                console.log(optionsCount);
+                                new Chart(ctx, {
+                                  type: 'bar',
+                                  data: {
+                                    labels: optionsL,
+                                    datasets: [{
+                                      label: '# of Votes',
+                                      data: optionsCount,
+                                      borderWidth: 1,
+                                      backgroundColor: '#9333EA',
+                                    }]
+                                  },
+                                  options: {
+                                    scales: {
+                                      y: {
+                                        beginAtZero: true,
+                                        max: "<%= totalVoters %>"
+                                      }
+                                    }
+                                  }
+                                });
+                              </script>
                         </li>
                     <% } %>
                 </ol>
