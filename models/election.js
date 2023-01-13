@@ -70,6 +70,21 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static updateElection({ urlString, electionName, id }) {
+      return this.update(
+        {
+          urlString,
+          electionName,
+        },
+        {
+          returning: true,
+          where: {
+            id,
+          },
+        }
+      );
+    }
+
     static deleteElection(id) {
       return this.destroy({
         where: {

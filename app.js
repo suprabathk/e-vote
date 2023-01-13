@@ -442,6 +442,87 @@ app.get(
   }
 );
 
+//edit election page
+app.get(
+  "/elections/:electionID/edit",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    if (request.user.role === "admin") {
+      try {
+        const election = await Election.getElection(request.params.electionID);
+        if (request.user.id !== election.adminID) {
+          request.flash("error", "Invalid election ID");
+          return response.redirect("/elections");
+        }
+        if (election.running) {
+          request.flash("error", "Cannot edit while election is running");
+          return response.redirect(`/elections/${request.params.id}/`);
+        }
+        if (election.ended) {
+          request.flash("error", "Cannot edit when election has ended");
+          return response.redirect(`/elections/${request.params.id}/`);
+        }
+        return response.render("edit_election", {
+          electionID: request.params.electionID,
+          csrfToken: request.csrfToken(),
+        });
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
+    } else if (request.user.role === "voter") {
+      return response.redirect("/");
+    }
+  }
+);
+
+//edit election
+app.put(
+  "/elections/:electionID/edit",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    if (request.user.role === "admin") {
+      if (request.body.electionName.length < 5) {
+        request.flash("error", "Election name length should be atleast 5");
+        return response.redirect(
+          `/elections/${request.params.electionID}/edit`
+        );
+      }
+      if (request.body.urlString.length < 3) {
+        request.flash("error", "URL String length should be atleast 3");
+        return response.redirect(
+          `/elections/${request.params.electionID}/edit`
+        );
+      }
+      try {
+        const election = await Election.getElection(request.params.electionID);
+        if (election.running) {
+          return response.json("Cannot edit while election is running");
+        }
+        if (election.ended) {
+          return response.json("Cannot edit when election has ended");
+        }
+        if (request.user.id !== election.adminID) {
+          return response.json({
+            error: "Invalid Election ID",
+          });
+        }
+        const updatedElection = await Election.updateElection({
+          electionName: request.body.electionName,
+          urlString: request.body.urlString,
+          id: request.params.electionID,
+        });
+        return response.json(updatedElection);
+      } catch (error) {
+        console.log(error);
+        return response.status(422).json(error);
+      }
+    } else if (request.user.role === "voter") {
+      return response.redirect("/");
+    }
+  }
+);
+
 //delete election
 app.delete(
   "/elections/:electionID",
