@@ -590,6 +590,7 @@ app.get(
         const totalVoters = noOfVoted + noOfVotePending;
         return response.render("results_admin", {
           electionName: election.electionName,
+          electionID: election.id,
           answers,
           questions,
           options,
