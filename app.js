@@ -238,6 +238,9 @@ app.get("/e/:urlString/voter", async (request, response) => {
       return response.redirect(`/e/${request.params.urlString}`);
     }
     const election = await Election.getElectionURL(request.params.urlString);
+    if (!election.running && !election.ended) {
+      return response.status(404).render("404");
+    }
     return response.render("voter_login", {
       title: "Login in as Voter",
       urlString: request.params.urlString,
@@ -1447,11 +1450,11 @@ app.get("/e/:urlString/", async (request, response) => {
       request.flash("error", "Please login before trying to Vote");
       return response.redirect(`/e/${request.params.urlString}/voter`);
     }
-    if (request.user.voted) {
-      request.flash("error", "You have voted successfully");
-      return response.redirect(`/e/${request.params.urlString}/results`);
-    }
     if (request.user.role === "voter") {
+      if (request.user.voted) {
+        request.flash("error", "You have voted successfully");
+        return response.redirect(`/e/${request.params.urlString}/results`);
+      }
       const questions = await Questions.getQuestions(election.id);
       let options = [];
       for (let question in questions) {
@@ -1473,9 +1476,9 @@ app.get("/e/:urlString/", async (request, response) => {
         });
       }
     } else if (request.user.role === "admin") {
-      request.flash("error", "You cannot vote as Admin");
-      request.flash("error", "Please signout as Admin before trying to vote");
-      return response.redirect(`/elections/${election.id}`);
+      request.logout(() => {});
+      request.flash("error", "Signed out as Admin");
+      return response.redirect(`/e/${request.params.urlString}/voter`);
     }
   } catch (error) {
     console.log(error);
@@ -1494,8 +1497,7 @@ app.post("/e/:urlString", async (request, response) => {
   }
   try {
     let election = await Election.getElectionURL(request.params.urlString);
-    if (!election.running) {
-      console.log("yppppppp");
+    if (!election.running && !election.ended) {
       return response.status(404).render("404");
     }
     if (election.ended) {
@@ -1506,23 +1508,29 @@ app.post("/e/:urlString", async (request, response) => {
       request.flash("error", "Please login before trying to Vote");
       return response.redirect(`/e/${request.params.urlString}/voter`);
     }
-    if (request.user.voted) {
-      request.flash("error", "You have voted successfully");
+    if (request.user.role === "voter") {
+      if (request.user.voted) {
+        request.flash("error", "You have voted successfully");
+        return response.redirect(`/e/${request.params.urlString}/results`);
+      }
+      let questions = await Questions.getQuestions(election.id);
+      for (let question of questions) {
+        let qid = `q-${question.id}`;
+        let selectedOption = request.body[qid];
+        await Answer.addAnswer({
+          voterID: request.user.id,
+          electionID: election.id,
+          questionID: question.id,
+          selectedOption: selectedOption,
+        });
+      }
+      await Voter.markAsVoted(request.user.id);
       return response.redirect(`/e/${request.params.urlString}/results`);
+    } else if (request.user.role === "admin") {
+      request.logout(() => {});
+      request.flash("error", "Cannot vote as Admin");
+      return response.redirect(`/e/${request.params.urlString}/voter`);
     }
-    let questions = await Questions.getQuestions(election.id);
-    for (let question of questions) {
-      let qid = `q-${question.id}`;
-      let selectedOption = request.body[qid];
-      await Answer.addAnswer({
-        voterID: request.user.id,
-        electionID: election.id,
-        questionID: question.id,
-        selectedOption: selectedOption,
-      });
-    }
-    await Voter.markAsVoted(request.user.id);
-    return response.redirect(`/e/${request.params.urlString}/results`);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -1532,6 +1540,9 @@ app.post("/e/:urlString", async (request, response) => {
 app.get("/e/:urlString/results", async (request, response) => {
   try {
     const election = await Election.getElectionURL(request.params.urlString);
+    if (!election.running && !election.ended) {
+      return response.status(404).render("404");
+    }
     if (!election.ended) {
       return response.render("thankyou");
     }
