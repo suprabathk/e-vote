@@ -1,112 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        let ctx = null;
-        let optionsL = null;
-        let optionsCount = null;
-    </script>
-    <title><%= electionName %> - Results</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let ctx = null;
+    let optionsL = null;
+    let optionsCount = null;
+  </script>
+  <title>
+    <%= electionName %> - Results
+  </title>
 </head>
-<body class="bg-gray-50">
-    <nav>
-        <div class="container flex flex-wrap items-center justify-between mx-auto">
-          <a href="/" class="py-2 px-4 flex items-center">
-            <span class="self-center text-xl font-semibold whitespace-nowrap text-purple-800">E-Vote</span>
-          </a>
-        </div>
-    </nav>
-    <div class=" flex  text-white antialiased flex-col  overflow-hidden py-6 sm:py-12 px-20">
-      <div class="w-full">
-          <div>
-              <% if (messages && messages.error && messages.error.length > 0) { %>
-                  <% for(var i=0; i<messages.error.length; i++) { %>
-                      <p class="bg-gray-600 my-3 list-none rounded-md px-4 py-2"><%= messages.error[i] %></p>
-                  <% } %>
+
+<body class="bg-gray-900">
+  <nav>
+    <div class="container flex flex-wrap items-center justify-between mx-auto">
+      <a href="/" class="py-2 px-4 flex items-center">
+        <span class="self-center text-xl font-semibold whitespace-nowrap text-white">E-Vote</span>
+      </a>
+    </div>
+  </nav>
+  <div class=" flex  text-white antialiased flex-col  overflow-hidden py-6 sm:py-12 px-20">
+    <div class="w-full">
+      <div>
+        <% if (messages && messages.error && messages.error.length> 0) { %>
+          <% for(var i=0; i<messages.error.length; i++) { %>
+            <p class="bg-gray-600 my-3 text-white list-none rounded-md px-4 py-2">
+              <%= messages.error[i] %>
+            </p>
+            <% } %>
               <% } %>
-          </div>
-          <div class="flex flex-col gap-6 divide-y-2 divide-white">
-              <span class="text-5xl font-light mb-8"><%= electionName %> - Results</span>
-              <div class="flex py-10">
-              <span class="text-3xl font-semibold ">Voting status:</span>
-              <div class="w-60">
-                  <canvas class="object-contain" id="votes"></canvas>
-                </div>
-                <script>
-                  ctx = document.getElementById('votes');
-                  completed = "<%= noOfVoted %>";
-                  pending = "<%= noOfVotePending %>";
-                  new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                      labels: ["Completed voters", "Pending voters"],
-                      datasets: [{
-                        data: [completed,pending],
-                        backgroundColor: [
-                          'rgb(129, 140, 248)',
-                          'rgb(55, 48, 163)'
-                          ],
-                      }]
-                    }
-                  });
-                </script>
-                </div>
-              <ol class="list-decimal mb-5 text-3xl">
-                  <% for(let i=0; i<questions.length; i++) { %>
-                      <li class="my-2">
-                          <div class="flex justify-between my-10">
-                          <div class="px-2 py-1">
-                              <h3 class="text-3xl my-2"><%= questions[i].question %></h3>
-                              <p class="text-lg my-2"><%= questions[i].description %></p>
-                              <div class="ml-8">
-                                  <ol class="list-none">
-                                      <% for(let j=0; j<options[i].length; j++) { %>
-                                              <li class="option-item mt-2 text-2xl">
-                                                  <label class="ml-2 text-xl px-1 my-2 text-gray-400"><span class="text-white"><%= options[i][j].option %></span> got <span class="text-white"><%= optionsCount[i][j] %></span> votes</label>
-                                              </li>
-                                      <% } %>
-                                  </ol>
-                              </div>
-                          </div>
-                          <div class="w-80">
-                              <canvas class="object-contain" id="myChart-<%= i %>"></canvas>
-                            </div>
-                          </div>
-                            <script>
-                              ctx = document.getElementById('myChart-<%= i %>');
-                              optionsCount = "<%= optionsCount[i] %>".split(",");
-                              optionsL = "<%= optionLabels[i] %>".split(",");
-                              new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                  labels: optionsL,
-                                  datasets: [{
-                                    label: '# of Votes',
-                                    data: optionsCount,
-                                    borderWidth: 1,
-                                    backgroundColor: 'rgb(129, 140, 248)',
-                                  }]
-                                },
-                                options: {
-                                  scales: {
-                                    y: {
-                                      beginAtZero: true,
-                                      max: "<%= totalVoters %>"
-                                    }
-                                  }
-                                }
-                              });
-                            </script>
-                      </li>
-                  <% } %>
-              </ol>
-          </div>
       </div>
+      <div class="flex flex-col gap-6 divide-y-2 divide-white">
+        <span class="text-5xl font-light mb-8">
+          <%= electionName %> - Results
+        </span>
+        <div class="flex py-3 justify-between">
+          <div class="flex flex-col justify-evenly">
+            <span class="text-4xl font-semibold text-gray-200">Voting status:</span>
+            <div class="flex flex-col text-gray-400">
+              <span class="text-3xl ">Total voters: <%= totalVoters %></span>
+              <span class="text-3xl ">Voters completed: <%= noOfVoted %></span>
+              <span class="text-3xl ">Voters pending: <%= noOfVotePending %></span>
+            </div>
+          </div>
+          <div class="w-60">
+            <canvas class="object-contain" id="votes"></canvas>
+          </div>
+          <script>
+            ctx = document.getElementById('votes');
+            completed = "<%= noOfVoted %>";
+            pending = "<%= noOfVotePending %>";
+            new Chart(ctx, {
+              type: 'pie',
+              data: {
+                labels: ["Completed voters", "Pending voters"],
+                datasets: [{
+                  data: [completed, pending],
+                  backgroundColor: [
+                    'rgb(129, 140, 248)',
+                    'rgb(55, 48, 163)'
+                  ],
+                }]
+              },
+              options: {
+                plugins: {  // 'legend' now within object 'plugins {}'
+                  legend: {
+                    labels: {
+                      color: "white",  // not 'fontColor:' anymore
+                      // fontSize: 18  // not 'fontSize:' anymore
+                      font: {
+                        size: 18 // 'size' now within object 'font {}'
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          </script>
+        </div>
+        <ol class="list-decimal mb-5 py-5 text-3xl">
+          <p class="text-4xl font-semibold text-gray-200 mb-4">Votes recieved:</p>
+          <% for(let i=0; i<questions.length; i++) { %>
+            <li class="my-4 bg-gray-800 rounded-md border border-white ">
+              <div class="flex justify-between my-3 items-center">
+                <div class="pl-4 py-1 divide-y">
+                  <div>
+                    <h3 class="text-3xl  font-semibold">
+                      <%= questions[i].question %>
+                    </h3>
+                    <p class="text-lg  text-gray-400">
+                      <%= questions[i].description %>
+                    </p>
+                  </div>
+                  <div class="ml-12 mt-6">
+                    <ol class="list-none">
+                      <% for(let j=0; j<options[i].length; j++) { %>
+                        <li class="option-item my-2 text-2xl grid grid-cols-10 text-white items-center">
+                          <% if (optionsCount[i][j]===winners[i]) {%>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                              stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+                            </svg>
+                            <% } %>
+                              <label class=" col-start-2 col-span-4 text-xl text-gray-400"><span class="text-white">
+                                  <%= options[i][j].option %>
+                                </span> got <span class="text-white">
+                                  <%= optionsCount[i][j] %>
+                                </span> votes</label>
+                        </li>
+                        <% } %>
+                    </ol>
+                  </div>
+                </div>
+                <div class="w-80  px-4  text-black">
+                  <canvas class="object-contain" id="myChart-<%= i %>"></canvas>
+                </div>
+              </div>
+              <script>
+                ctx = document.getElementById('myChart-<%= i %>');
+                optionsCount = "<%= optionsCount[i] %>".split(",");
+                optionsL = "<%= optionLabels[i] %>".split(",");
+                new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                    labels: optionsL,
+                    datasets: [{
+                      label: '# of Votes',
+                      data: optionsCount,
+                      borderWidth: 1,
+                      borderColor: "#fff",
+                      backgroundColor: 'rgb(55, 48, 163)',
+                    }]
+                  },
+                  options: {
+                    plugins: {  // 'legend' now within object 'plugins {}'
+                      legend: {
+                        labels: {
+                          color: "white",  // not 'fontColor:' anymore
+                          // fontSize: 18  // not 'fontSize:' anymore
+                          font: {
+                            size: 18 // 'size' now within object 'font {}'
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {  // not 'yAxes: [{' anymore (not an array anymore)
+                        ticks: {
+                          color: "white", // not 'fontColor:' anymore
+                          // fontSize: 18,
+                          font: {
+                            size: 18, // 'size' now within object 'font {}'
+                          },
+                          stepSize: 1,
+                          beginAtZero: true
+                        },
+                        grid: {
+                          color: '#fff',  // <-- this line is answer to initial question
+                        }
+                      },
+                      x: {  // not 'xAxes: [{' anymore (not an array anymore)
+                        ticks: {
+                          color: "white",  // not 'fontColor:' anymore
+                          //fontSize: 14,
+                          font: {
+                            size: 14 // 'size' now within object 'font {}'
+                          },
+                          stepSize: 1,
+                          beginAtZero: true
+                        },
+                        grid: {
+                          color: '#fff',  // <-- this line is answer to initial question
+                        }
+                      }
+                    }
+                  }
+                });
+              </script>
+            </li>
+            <% } %>
+        </ol>
+      </div>
+    </div>
   </div>
 </body>
 </html>

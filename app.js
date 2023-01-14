@@ -570,6 +570,7 @@ app.get(
         let options = [];
         let optionLabels = [];
         let optionsCount = [];
+        let winners = [];
         for (let question in questions) {
           let opts = await Options.getOptions(questions[question].id);
           options.push(opts);
@@ -585,6 +586,7 @@ app.get(
               })
             );
           }
+          winners.push(Math.max.apply(Math, opts_count));
           optionLabels.push(opts_labels);
           optionsCount.push(opts_count);
         }
@@ -596,6 +598,7 @@ app.get(
           electionID: election.id,
           answers,
           questions,
+          winners,
           options,
           optionsCount,
           optionLabels,
@@ -1552,6 +1555,7 @@ app.get("/e/:urlString/results", async (request, response) => {
     let options = [];
     let optionLabels = [];
     let optionsCount = [];
+    let winners = [];
     for (let question in questions) {
       let opts = await Options.getOptions(questions[question].id);
       options.push(opts);
@@ -1567,6 +1571,7 @@ app.get("/e/:urlString/results", async (request, response) => {
           })
         );
       }
+      winners.push(Math.max.apply(Math, opts_count));
       optionLabels.push(opts_labels);
       optionsCount.push(opts_count);
     }
@@ -1577,6 +1582,7 @@ app.get("/e/:urlString/results", async (request, response) => {
       electionName: election.electionName,
       answers,
       questions,
+      winners,
       options,
       optionsCount,
       optionLabels,

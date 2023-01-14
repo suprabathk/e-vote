@@ -59,32 +59,33 @@
                     <% } %>
                 <% } %>
             </div>
-            <div class="mt-4 bg-gray-700 border border-white shadow-md rounded-lg text-left text-white">
-                <div class="h-2 bg-white rounded-t-md"></div>
-                <div class="py-2 px-8">
-                    <ol class="list-decimal text-2xl">
-                        <% for(let i=0; i<questions.length; i++) { %>
-                            <li class="my-2">
-                                <div class="px-2 py-1">
-                                    <h3 class="text-3xl my-2"><%= questions[i].question %></h3>
-                                    <p class="text-gray-400 text-md my-2"><%= questions[i].description %></p>
-                                </div>
-                                <div class="ml-8">
-                                    <ol class="list-none">
-                                        <% for(let j=0; j<options[i].length; j++) { %>
-                                                <li class="option-item mt-2 cursor-pointer">
-                                                    <input type="radio" id="<%= options[i][j].id %>" class="cursor-pointer" name="answer-<%= questions[i].id %>">
-                                                    <label class="px-1 my-2 cursor-pointer" for="<%= options[i][j].id %>" class="ml-2 text-lg "><%= options[i][j].option %></label>
-                                                </li>
-                                        <% } %>
-                                    </ol>
-                                </div>
-                            </li>
-                        <% } %>
-                    </ol>
+        
+                <div class="pb-2 px-8">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <ol class="list-decimal mb-5 text-xl">
+                            <% for(let i=0; i<questions.length; i++) { %>
+                                        <div class="mt-4 bg-gray-700 border border-white shadow-md rounded-lg text-left">
+                                        <li class="ml-8 my-2">
+                                            <div class="px-2 py-1">
+                                                <h3 class="text-2xl my-1"><%= questions[i].question %></h3>
+                                                <p class="text-gray-400 text-sm "><%= questions[i].description %></p>
+                                            </div>
+                                            <div class="ml-8 mt-2">
+                                                <ol class="list-none">
+                                                    <% for(let j=0; j<options[i].length; j++) { %>
+                                                            <li class="option-item  cursor-pointer">
+                                                                <input type="radio" id="<%= options[i][j].id %>" class="cursor-pointer" name="q-<%= questions[i].id %>" value="<%= options[i][j].id %>" required>
+                                                                <label class="px-1 cursor-pointer text-lg" for="<%= options[i][j].id %>" class="ml-2 text-lg "><%= options[i][j].option %></label>
+                                                            </li>
+                                                    <% } %>
+                                                </ol>
+                                            </div>
+                                        </li>
+                                    </div>
+                                    <% } %>
+                                </ol>
                 </div>
-            </div>
-        </div>
+       
     </div>
     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 </body>
