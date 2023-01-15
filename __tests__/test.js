@@ -891,90 +891,185 @@ describe("Online voting application", function () {
     expect(res.statusCode).toBe(200);
   });
 
-  // test("Vote submission", async () => {
-  //   const agent = request.agent(server);
-  //   await login(agent, "user.a@test.com", "12345678");
+  test("End an election", async () => {
+    const agent = request.agent(server);
+    await login(agent, "user.a@test.com", "12345678");
 
-  //   //create new election
-  //   let res = await agent.get("/elections/create");
-  //   let csrfToken = extractCsrfToken(res);
-  //   await agent.post("/elections").send({
-  //     electionName: "Test election",
-  //     urlString: "test1234",
-  //     _csrf: csrfToken,
-  //   });
-  //   const groupedElectionsResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
-  //   const electionCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionCount - 1];
+    //create new election
+    let res = await agent.get("/elections/create");
+    let csrfToken = extractCsrfToken(res);
+    await agent.post("/elections").send({
+      electionName: "Test election",
+      urlString: "test33",
+      _csrf: csrfToken,
+    });
+    const groupedElectionsResponse = await agent
+      .get("/elections")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+    const electionCount = parsedGroupedResponse.elections.length;
+    const latestElection = parsedGroupedResponse.elections[electionCount - 1];
 
-  //   //add a question
-  //   res = await agent.get(`/elections/${latestElection.id}/questions/create`);
-  //   csrfToken = extractCsrfToken(res);
-  //   await agent.post(`/elections/${latestElection.id}/questions/create`).send({
-  //     question: "Test question",
-  //     description: "Test description",
-  //     _csrf: csrfToken,
-  //   });
+    //add a question
+    res = await agent.get(`/elections/${latestElection.id}/questions/create`);
+    csrfToken = extractCsrfToken(res);
+    await agent.post(`/elections/${latestElection.id}/questions/create`).send({
+      question: "Test question",
+      description: "Test description",
+      _csrf: csrfToken,
+    });
 
-  //   const groupedQuestionsResponse = await agent
-  //     .get(`/elections/${latestElection.id}/questions`)
-  //     .set("Accept", "application/json");
-  //   const parsedQuestionsGroupedResponse = JSON.parse(
-  //     groupedQuestionsResponse.text
-  //   );
-  //   const questionCount = parsedQuestionsGroupedResponse.questions.length;
-  //   const latestQuestion =
-  //     parsedQuestionsGroupedResponse.questions[questionCount - 1];
+    const groupedQuestionsResponse = await agent
+      .get(`/elections/${latestElection.id}/questions`)
+      .set("Accept", "application/json");
+    const parsedQuestionsGroupedResponse = JSON.parse(
+      groupedQuestionsResponse.text
+    );
+    const questionCount = parsedQuestionsGroupedResponse.questions.length;
+    const latestQuestion =
+      parsedQuestionsGroupedResponse.questions[questionCount - 1];
 
-  //   //adding option 1
-  //   res = await agent.get(
-  //     `/elections/${latestElection.id}/questions/${latestQuestion.id}`
-  //   );
-  //   csrfToken = extractCsrfToken(res);
-  //   res = await agent
-  //     .post(`/elections/${latestElection.id}/questions/${latestQuestion.id}`)
-  //     .send({
-  //       _csrf: csrfToken,
-  //       option: "Test option",
-  //     });
+    //adding option 1
+    res = await agent.get(
+      `/elections/${latestElection.id}/questions/${latestQuestion.id}`
+    );
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/questions/${latestQuestion.id}`)
+      .send({
+        _csrf: csrfToken,
+        option: "Test option",
+      });
 
-  //   //adding option 2
-  //   res = await agent.get(
-  //     `/elections/${latestElection.id}/questions/${latestQuestion.id}`
-  //   );
-  //   csrfToken = extractCsrfToken(res);
-  //   res = await agent
-  //     .post(`/elections/${latestElection.id}/questions/${latestQuestion.id}`)
-  //     .send({
-  //       _csrf: csrfToken,
-  //       option: "Test option",
-  //     });
+    //adding option 2
+    res = await agent.get(
+      `/elections/${latestElection.id}/questions/${latestQuestion.id}`
+    );
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/questions/${latestQuestion.id}`)
+      .send({
+        _csrf: csrfToken,
+        option: "Test option",
+      });
+    //add a voter
+    res = await agent.get(`/elections/${latestElection.id}/voters/create`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/voters/create`)
+      .send({
+        voterid: "Test voter90",
+        password: "Test password",
+        _csrf: csrfToken,
+      });
 
-  //   //add a voter
-  //   res = await agent.get(`/elections/${latestElection.id}/voters/create`);
-  //   csrfToken = extractCsrfToken(res);
-  //   res = await agent
-  //     .post(`/elections/${latestElection.id}/voters/create`)
-  //     .send({
-  //       voterid: "Testvoterrr2",
-  //       password: "Testpassword",
-  //       _csrf: csrfToken,
-  //     });
+    //election is not running by default
+    expect(latestElection.running).toBe(false);
 
-  //   res = await agent.get(`/elections/${latestElection.id}/preview`);
-  //   csrfToken = extractCsrfToken(res);
-  //   res = await agent.put(`/elections/${latestElection.id}/launch`).send({
-  //     _csrf: csrfToken,
-  //   });
+    res = await agent.get(`/elections/${latestElection.id}/preview`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent.put(`/elections/${latestElection.id}/launch`).send({
+      _csrf: csrfToken,
+    });
+    let launchedElectionRes = JSON.parse(res.text);
+    expect(launchedElectionRes[1][0].running).toBe(true);
 
-  //   await voterLogin(agent, latestElection.urlString, "Testvoterrr2", "Testpassword");
-  //   const groupedVoteResponse = await agent.get(`/e/${latestElection.urlString}`).set("Accept", "application/json");
-  //   console.log(groupedVoteResponse.text);
-  //   // const parsedVoteGroupedResponse = JSON.parse(groupedVoteResponse.text);
-  //   //submit vote
-  //   // res = await agent.post(`/e/${latestElection.urlString}`).send(`q-${latestQuestion.id}=`);
-  // });
+    res = await agent.get(`/elections/${latestElection.id}/`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent.put(`/elections/${latestElection.id}/end`).send({
+      _csrf: csrfToken,
+    });
+    launchedElectionRes = JSON.parse(res.text);
+    expect(launchedElectionRes[1][0].running).toBe(false);
+  });
+
+  test("Cannot vote after ending election", async () => {
+    const agent = request.agent(server);
+    await login(agent, "user.a@test.com", "12345678");
+
+    //create new election
+    let res = await agent.get("/elections/create");
+    let csrfToken = extractCsrfToken(res);
+    await agent.post("/elections").send({
+      electionName: "Test election",
+      urlString: "test3343",
+      _csrf: csrfToken,
+    });
+    const groupedElectionsResponse = await agent
+      .get("/elections")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+    const electionCount = parsedGroupedResponse.elections.length;
+    const latestElection = parsedGroupedResponse.elections[electionCount - 1];
+
+    //add a question
+    res = await agent.get(`/elections/${latestElection.id}/questions/create`);
+    csrfToken = extractCsrfToken(res);
+    await agent.post(`/elections/${latestElection.id}/questions/create`).send({
+      question: "Test question",
+      description: "Test description",
+      _csrf: csrfToken,
+    });
+
+    const groupedQuestionsResponse = await agent
+      .get(`/elections/${latestElection.id}/questions`)
+      .set("Accept", "application/json");
+    const parsedQuestionsGroupedResponse = JSON.parse(
+      groupedQuestionsResponse.text
+    );
+    const questionCount = parsedQuestionsGroupedResponse.questions.length;
+    const latestQuestion =
+      parsedQuestionsGroupedResponse.questions[questionCount - 1];
+
+    //adding option 1
+    res = await agent.get(
+      `/elections/${latestElection.id}/questions/${latestQuestion.id}`
+    );
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/questions/${latestQuestion.id}`)
+      .send({
+        _csrf: csrfToken,
+        option: "Test option",
+      });
+
+    //adding option 2
+    res = await agent.get(
+      `/elections/${latestElection.id}/questions/${latestQuestion.id}`
+    );
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/questions/${latestQuestion.id}`)
+      .send({
+        _csrf: csrfToken,
+        option: "Test option",
+      });
+    //add a voter
+    res = await agent.get(`/elections/${latestElection.id}/voters/create`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .post(`/elections/${latestElection.id}/voters/create`)
+      .send({
+        voterid: "Test voter900",
+        password: "Test password",
+        _csrf: csrfToken,
+      });
+
+    //launch election
+    res = await agent.get(`/elections/${latestElection.id}/preview`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent.put(`/elections/${latestElection.id}/launch`).send({
+      _csrf: csrfToken,
+    });
+
+    //end election
+    res = await agent.get(`/elections/${latestElection.id}/`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent.put(`/elections/${latestElection.id}/end`).send({
+      _csrf: csrfToken,
+    });
+
+    res = await agent.get(`/e/${latestElection.urlString}/voter`);
+    expect(res.statusCode).toBe(302);
+  });
 });
