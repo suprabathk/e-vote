@@ -13,3 +13,6 @@ Secure, fast and automatic calculation of ballot & votes with immediate results.
 - Add voters to your election who can login with their VoterID and password to participate in the election.
 - Preview live results of the election and status of election.
 - Visually appealing graphs to provide maximum and useful information.
+
+## Screenshots
+![Homepage](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(70).png)
