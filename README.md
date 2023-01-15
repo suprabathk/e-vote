@@ -6,6 +6,9 @@ Easy & Secure online voting platform.
 Create an election for your school or organization in seconds.  
 Secure, fast and automatic calculation of ballot & votes with immediate results.
 
+## Demonstration video
+[https://www.loom.com/share/b29b775ecef1469f9e5bbbdc10f63e05](https://www.loom.com/share/b29b775ecef1469f9e5bbbdc10f63e05)
+
 ## Features
 
 - Create and host elections with a custom public URL.
