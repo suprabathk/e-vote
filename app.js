@@ -1545,7 +1545,9 @@ app.get("/e/:urlString/results", async (request, response) => {
   try {
     const election = await Election.getElectionURL(request.params.urlString);
     if (request.user) {
-      request.logout(() => {});
+      if (request.user.role === "voter") {
+        request.logout(() => {});
+      }
     }
     if (!election.running && !election.ended) {
       return response.status(404).render("404");
