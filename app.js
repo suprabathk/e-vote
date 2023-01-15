@@ -754,11 +754,11 @@ app.get(
         }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
-          return response.redirect(`/elections/${request.params.id}/`);
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         if (election.ended) {
           request.flash("error", "Cannot edit when election has ended");
-          return response.redirect(`/elections/${request.params.id}/`);
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         const question = await Questions.getQuestion(request.params.questionID);
         return response.render("edit_question", {
@@ -989,11 +989,11 @@ app.get(
         }
         if (election.running) {
           request.flash("error", "Cannot edit while election is running");
-          return response.redirect(`/elections/${request.params.id}/`);
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         if (election.ended) {
           request.flash("error", "Cannot edit when election has ended");
-          return response.redirect(`/elections/${request.params.id}/`);
+          return response.redirect(`/elections/${request.params.electionID}/`);
         }
         const option = await Options.getOption(request.params.optionID);
         return response.render("edit_option", {
