@@ -15,4 +15,9 @@ Secure, fast and automatic calculation of ballot & votes with immediate results.
 - Visually appealing graphs to provide maximum and useful information.
 
 ## Screenshots
-![Homepage](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(70).png)
+![Screenshot 1](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(70).png)
+![Screenshot 2](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(72).png)
+![Screenshot 3](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(73).png)
+![Screenshot 4](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(74).png)
+![Screenshot 5](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(75).png)
+![Screenshot 6](https://raw.github.com/suprabathk/e-vote/main/Screenshots/Screenshot%20(76).png)
