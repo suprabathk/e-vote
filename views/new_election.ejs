@@ -5,6 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function updateURL() {
+            let url = document.getElementById("urlString").value;
+            document.getElementById("urlHint").innerHTML = "https://e-vote.onrender.com/e/"+url;
+        }
+    </script>
     <title><%= title %></title>
 </head>
 <body class="bg-gray-900">
@@ -31,7 +37,8 @@
                     <label for="electionName" class="block mt-3 font-semibold">What is your election's name?</label>
                     <input id="electionName" name="electionName" type="text" placeholder="Election name" class="text-black border w-full h-5 px-3 py-5 mt-2 hover:outline-none focus:outline-none focus:ring-gray-200 focus:ring-1 rounded-md" required>
                     <label for="urlString" class="block mt-3 font-semibold">Enter a custom URL string (With no spaces)</label>
-                    <input id="urlString" name="urlString" type="text" placeholder="Election URL String" class="text-black border w-full h-5 px-3 py-5 mt-2 hover:outline-none focus:outline-none focus:ring-gray-200 focus:ring-1 rounded-md" required>
+                    <input oninput="updateURL()" id="urlString" name="urlString" type="text" placeholder="Election URL String" class="text-black border w-full h-5 px-3 py-5 mt-2 hover:outline-none focus:outline-none focus:ring-gray-200 focus:ring-1 rounded-md" required>
+                    <p id="urlHint" class="text-white mt-1">https://e-vote.onrender.com/e/(URL string)</p>
                     <button type="submit" class="mt-6 w-full bg-gray-500 border border-white text-white py-2 px-6 rounded-md hover:bg-white hover:text-gray-900 transition-all ease-linear">Create election</button>
                 </form>
             </div>
