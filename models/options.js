@@ -71,6 +71,9 @@ module.exports = (sequelize, DataTypes) => {
       option: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          notNull: true,
+        },
       },
     },
     {

@@ -120,11 +120,17 @@ module.exports = (sequelize, DataTypes) => {
       electionName: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          notNull: true,
+        },
       },
       urlString: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+          notNull: true,
+        },
       },
       running: {
         type: DataTypes.BOOLEAN,

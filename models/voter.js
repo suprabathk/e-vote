@@ -104,6 +104,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+          notNull: true,
+        },
       },
       role: {
         type: DataTypes.STRING,
@@ -112,10 +115,16 @@ module.exports = (sequelize, DataTypes) => {
       password: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          notNull: true,
+        },
       },
       voted: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        validate: {
+          notNull: true,
+        },
         defaultValue: false,
       },
     },
